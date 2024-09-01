@@ -1,0 +1,25 @@
+name: UserTests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/vityaman/xv6:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.VITYAMAN_PACKAGE_READ }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Build
+        run: make
+
+      - name: Test
+        run: sh ./ci/test/run.sh
