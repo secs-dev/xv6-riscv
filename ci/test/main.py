@@ -11,20 +11,26 @@ class TestResult(NamedTuple):
     duration: timedelta
 
 
+def assert_eq(lhs, rhs):
+    if lhs != rhs:
+        print(f"Assertion failed: '{lhs}' != '{rhs}'")
+    assert lhs == rhs
+
+
 def read_header(qemu: Qemu):
     prefix = [qemu.readline() for _ in range(7)]
-    assert prefix[2] == "xv6 kernel is booting"
-    assert prefix[3] == ""
+    assert_eq(prefix[2], "xv6 kernel is booting")
+    assert_eq(prefix[3], "")
     assert prefix[4] in (f"hart {i + 1} starting" for i in range(2))
     assert prefix[5] in (f"hart {i + 1} starting" for i in range(2))
-    assert prefix[6] == "init: starting sh"
+    assert_eq(prefix[6], "init: starting sh")
 
 
 def start_usertests(qemu: Qemu):
     qemu.writeline("usertests")
-    assert qemu.readline() == "usertests"
-    assert qemu.readline() == ""
-    assert qemu.readline() == "$ usertests starting"
+    assert_eq(qemu.readline(), "usertests")
+    assert_eq(qemu.readline(), "")
+    assert_eq(qemu.readline(), "$ usertests starting")
 
 
 def read_test(qemu: Qemu, test: Test) -> TestResult:
