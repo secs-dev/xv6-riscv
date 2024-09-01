@@ -7,5 +7,5 @@ cd "$(dirname "$0")"
 docker run \
     -it \
     --rm \
-    --volume $(pwd)/../..:/xv6 os-xv6-riscv:latest \
+    --volume $(pwd)/../..:/xv6 vityamand/xv6:latest \
     /bin/bash
