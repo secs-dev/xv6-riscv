@@ -1,10 +1,12 @@
 import re
+from math import ceil
 from typing import NamedTuple
 from datetime import timedelta, datetime
 
 from registry import QUICK_TESTS
 from qemu import Qemu
 from test import Test
+from timeout import TimeBudget
 
 
 class TestResult(NamedTuple):
@@ -78,7 +80,10 @@ if __name__ == "__main__":
 
             print(f"[{str(progress).rjust(2)}%] Running test '{test.name}'...".ljust(36), end=" ", flush=True)
             print(f"{expected_duration:.3f}s".rjust(7), end=" > ", flush=True)
-            result = read_test(qemu, test)
+
+            with TimeBudget(ceil(test.timeout.total_seconds())):
+                result = read_test(qemu, test)
+
             print(f"{result.duration.total_seconds():.3f}s".rjust(7), "=> OK!")
 
             current_duration += expected_duration
