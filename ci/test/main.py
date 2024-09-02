@@ -3,7 +3,7 @@ from math import ceil
 from typing import NamedTuple
 from datetime import timedelta, datetime
 
-from registry import QUICK_TESTS
+from registry import QUICK_TESTS, SLOW_TESTS
 from qemu import Qemu
 from test import Test
 from timeout import TimeBudget
@@ -35,9 +35,13 @@ def start_usertests(qemu: Qemu):
     assert_eq(qemu.readline(), "$ usertests starting")
 
 
+def is_ok_separated(test: Test) -> bool:
+    return test.extra_lines != 0 or test.name == "outofinodes"
+
+
 def read_test(qemu: Qemu, test: Test) -> TestResult:
     pattern = "test " + test.name + ": .{" + str(test.suffix_size) + "}"
-    if test.extra_lines == 0:
+    if not is_ok_separated(test):
         pattern += "OK"
 
     begin = datetime.now()
@@ -49,16 +53,56 @@ def read_test(qemu: Qemu, test: Test) -> TestResult:
     for i in range(test.extra_lines):
         qemu.readline()
 
-    if test.extra_lines != 0:
+    if is_ok_separated(test):
         status = qemu.readline()
         if status != "OK":
             raise ValueError(f"Unexpected {status = }")
 
     end = datetime.now()
-    
+
     return TestResult(
         duration=end - begin,
     )
+
+
+def read_suite(qemu: Qemu, name: str):
+    assert name in ("quick", "slow")
+
+    match name:
+        case "quick":
+            tests = QUICK_TESTS
+        case "slow":
+            tests = SLOW_TESTS
+
+    print(f"Reading test suite '{name}'...")
+
+    current_duration = 0
+    total_duration = sum(test.timeout.total_seconds() for test in tests)
+    for test in tests:
+        expected_duration = test.timeout.total_seconds()
+        progress = round(current_duration / total_duration * 100)
+
+        print(
+            f"[{str(progress).rjust(2)}%] Running test '{test.name}'...".ljust(36),
+            end=" ",
+            flush=True,
+        )
+        print(f"{expected_duration:.3f}s".rjust(7), end=" > ", flush=True)
+
+        with TimeBudget(ceil(test.timeout.total_seconds())):
+            result = read_test(qemu, test)
+
+        print(f"{result.duration.total_seconds():.3f}s".rjust(7), "=> OK!")
+
+        current_duration += expected_duration
+
+    match name:
+        case "quick":
+            assert_eq(qemu.readline(), "usertests slow tests starting")
+        case "slow":
+            assert_eq(qemu.readline(), "ALL TESTS PASSED")
+
+    print(f"Test suite '{name}' was passed!")
 
 
 if __name__ == "__main__":
@@ -71,21 +115,9 @@ if __name__ == "__main__":
         print("Kernel was booted.")
 
         start_usertests(qemu)
+        print("Usertests was started.")
 
-        current_duration = 0
-        total_duration = sum(test.timeout.total_seconds() for test in QUICK_TESTS)
-        for test in QUICK_TESTS:
-            expected_duration = test.timeout.total_seconds()
-            progress = round(current_duration / total_duration * 100)
+        read_suite(qemu, "quick")
+        read_suite(qemu, "slow")
 
-            print(f"[{str(progress).rjust(2)}%] Running test '{test.name}'...".ljust(36), end=" ", flush=True)
-            print(f"{expected_duration:.3f}s".rjust(7), end=" > ", flush=True)
-
-            with TimeBudget(ceil(test.timeout.total_seconds())):
-                result = read_test(qemu, test)
-
-            print(f"{result.duration.total_seconds():.3f}s".rjust(7), "=> OK!")
-
-            current_duration += expected_duration
-        
-        print("Quick tests passed!")
+        print("You are cool!")

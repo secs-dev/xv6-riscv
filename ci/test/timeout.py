@@ -10,9 +10,7 @@ class TimeBudget:
     def __init__(self, seconds: int, message=None):
         self.seconds = seconds
         self.message = (
-            message
-            if message is not None
-            else f"Operation timed out after {self.seconds}"
+            message if message is not None else f"Operation timed out {self.seconds}s"
         )
 
     def __enter__(self):
