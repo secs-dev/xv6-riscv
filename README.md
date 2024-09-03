@@ -2,7 +2,9 @@
 
 ## Начало работы
 
-1. [Первый запуск ОС Xv6 под Linux](/doc/setup/linux.md)
+1. [Первый запуск ОС Xv6: Linux](/doc/setup/linux.md)
+
+2. [Настройка IDE: VSCode](/doc/dev/vscode.md)
 
 ## Лабораторные работы
 
