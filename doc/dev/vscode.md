@@ -30,6 +30,16 @@ sh ci/dev/prepare.sh
 
 Вы должны заметить появившийся в корне репозитория файл `compile_commands.json`. Теперь [clangd][1] должен работать исправно (иначе попробуйте перезагрузить окно (reload window) [VSCode][6]).
 
+## Шаг 5. Отладка ядра
+
+Для запуска отладчика `gdb` вам понадобится открыть терминал и выполнить следующую команду.
+
+```bash
+make qemu-gdb
+```
+
+Запустится `qemu` и будет дожидаться подключение дебаггера. Для запуска `gdb` нажмите `F5`.
+
 [1]: https://clangd.llvm.org/
 [4]: https://github.com/rizsotto/Bear
 [5]: https://repology.org/project/bear-clang/versions
