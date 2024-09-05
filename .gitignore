@@ -10,3 +10,11 @@ _*
 /user/usys.S
 .gdbinit
 TAGS
+
+# Clangd
+compile_commands.json
+compile_commands.events.json
+.cache
+
+# Python
+__pycache__/
