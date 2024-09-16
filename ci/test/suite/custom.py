@@ -205,6 +205,7 @@ DUMP2TESTS = SimpleSuite(
     ]
 )
 
+
 ALLOCTEST = SimpleSuite(
     name = "alloctest",
     prologue = [],
@@ -227,4 +228,43 @@ ALLOCTEST = SimpleSuite(
         ),
     ],
     epilogue = [],
+)
+
+
+COWTEST = SimpleSuite(
+    name = "cowtest",
+    prologue = [],
+    tests = [
+        PatternTest(
+            name = "simple 1",
+            timeout = timedelta(seconds = 60),
+            patterns = ["simple: ok"],
+        ),
+        PatternTest(
+            name = "simple 2",
+            timeout = timedelta(seconds = 60),
+            patterns = ["simple: ok"],
+        ),
+        PatternTest(
+            name = "three 1",
+            timeout = timedelta(seconds = 60),
+            patterns = ["three: ok"],
+        ),
+        PatternTest(
+            name = "three 2",
+            timeout = timedelta(seconds = 60),
+            patterns = ["three: ok"],
+        ),
+        PatternTest(
+            name = "three 3",
+            timeout = timedelta(seconds = 60),
+            patterns = ["three: ok"],
+        ),
+        PatternTest(
+            name = "file",
+            timeout = timedelta(seconds = 60),
+            patterns = ["file: ok"],
+        ),
+    ],
+    epilogue = ["ALL COW TESTS PASSED"],
 )
