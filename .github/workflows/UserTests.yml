@@ -20,24 +20,24 @@ jobs:
       
       - name: Show the MR info
         run: |
-          echo "Source branch: '$GITHUB_BASE_REF'"
-          echo "Target branch: '$GITHUB_HEAD_REF'"
+          echo "Target branch: '$GITHUB_BASE_REF'"
+          echo "Source branch: '$GITHUB_HEAD_REF'"
 
       - name: Build
         run: make && make fs.img
 
       - name: Test Lab 1
-        if: ${{ github.base_ref == 'lab-1' }}
+        if: ${{ github.head_ref == 'lab-1' }}
         run: sh ./ci/test/run.sh dumptests dump2tests usertests
       
       - name: Test Lab 2
-        if: ${{ github.base_ref == 'lab-2' }}
+        if: ${{ github.head_ref == 'lab-2' }}
         run: echo "Not implemented" || exit 1
 
       - name: Test Lab 3
-        if: ${{ github.base_ref == 'lab-3' }}
+        if: ${{ github.head_ref == 'lab-3' }}
         run: echo "Not implemented" || exit 1
 
       - name: Test Basic
-        if: ${{ ! startsWith(github.base_ref, 'lab-') }}
+        if: ${{ ! startsWith(github.head_ref, 'lab-') }}
         run: sh ./ci/test/run.sh usertests
