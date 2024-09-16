@@ -12,7 +12,10 @@ class SimpleSuite(TestSuite):
         self.tests = tests
         self.epilogue = epilogue
 
-        self.prologue[0] = f"(\\$ )+{self.prologue[0]}"
+        if len(self.prologue) != 0:
+            self.prologue[0] = f"(\\$ )+{self.prologue[0]}"
+        else:
+            self.tests[0].patterns[0] = f"(\\$ )+{self.tests[0].patterns[0]}"
 
     def start(self, stream: RWStream):
         Xv6(stream).run(self.name)

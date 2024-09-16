@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 from argparse import ArgumentParser
 
 from suite.usertests import Xv6UserTestSuite
-from suite.custom import DUMPTESTS, DUMP2TESTS
+from suite.custom import DUMPTESTS, DUMP2TESTS, ALLOCTEST
 from test import assert_eq
 from qemu import Qemu
 
@@ -13,6 +13,7 @@ SUITES = {
     suite.name: suite for suite in (
         DUMPTESTS,
         DUMP2TESTS,
+        ALLOCTEST,
     )
 }
 

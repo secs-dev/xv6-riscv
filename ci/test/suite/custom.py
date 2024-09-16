@@ -204,3 +204,27 @@ DUMP2TESTS = SimpleSuite(
         "4 tests were run. 4 tests passed",
     ]
 )
+
+ALLOCTEST = SimpleSuite(
+    name = "alloctest",
+    prologue = [],
+    tests = [
+        PatternTest(
+            name = "filetest",
+            timeout = timedelta(seconds = 2),
+            patterns = [
+                "filetest: start",
+                "filetest: OK",
+            ],
+        ),
+        PatternTest(
+            name = "memtest",
+            timeout = timedelta(seconds = 16),
+            patterns = [
+                "memtest: start",
+                "memtest: OK",
+            ],
+        ),
+    ],
+    epilogue = [],
+)

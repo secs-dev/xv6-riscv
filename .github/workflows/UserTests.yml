@@ -32,7 +32,7 @@ jobs:
       
       - name: Test Lab 2
         if: ${{ github.head_ref == 'lab-2' }}
-        run: echo "Not implemented" || exit 1
+        run: sh ./ci/test/run.sh alloctest usertests
 
       - name: Test Lab 3
         if: ${{ github.head_ref == 'lab-3' }}
