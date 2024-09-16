@@ -268,3 +268,24 @@ COWTEST = SimpleSuite(
     ],
     epilogue = ["ALL COW TESTS PASSED"],
 )
+
+
+LAZYTESTS = SimpleSuite(
+    name = "lazytests",
+    prologue = ["lazytests starting"],
+    tests = [
+        PatternTest(
+            name = test_name,
+            timeout = timedelta(seconds = 60),
+            patterns = [
+                f"running test {test_name}",
+                f"test {test_name}: OK",
+            ],
+        ) for test_name in (
+            "lazy alloc",
+            "lazy unmap",
+            "out of memory",
+        )
+    ],
+    epilogue = ["ALL TESTS PASSED"],
+)
