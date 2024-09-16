@@ -1,15 +1,25 @@
-from math import ceil
 from abc import ABC, abstractmethod
-from enum import Enum
+from math import ceil
 
-from test import Test, Xv6UserTest, assert_eq
-from timeout import TimeBudget
 from stream import RWStream
+from test import Test
+from timeout import TimeBudget
+
+
+class TestSuite(ABC):
+    @abstractmethod
+    def start(self, stream: RWStream):
+        pass
+
+    @abstractmethod
+    def expect(self, stream: RWStream):
+        pass
 
 
 def expect(stream: RWStream, tests: list[Test]):
     current_duration = 0
     total_duration = sum(test.timeout.total_seconds() for test in tests)
+
     for test in tests:
         expected_duration = test.timeout.total_seconds()
         progress = round(current_duration / total_duration * 100)
@@ -27,13 +37,3 @@ def expect(stream: RWStream, tests: list[Test]):
         print(f"{result.duration.total_seconds():.3f}s".rjust(7), "=> OK!")
 
         current_duration += expected_duration
-
-
-class TestSuite(ABC):
-    @abstractmethod
-    def start(self, stream: RWStream):
-        pass
-
-    @abstractmethod
-    def expect(self, stream: RWStream):
-        pass

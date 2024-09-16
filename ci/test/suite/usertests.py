@@ -1,7 +1,10 @@
 from datetime import timedelta
+
 from stream import RWStream
-from suite.core import expect, TestSuite
-from test import Xv6UserTest, assert_eq
+from suite.core import TestSuite, expect
+from test import Test, Xv6UserTest, assert_eq
+from timeout import TimeBudget
+from xv6 import Xv6
 
 
 QUICK_TESTS = [
@@ -123,13 +126,10 @@ SLOW_TESTS = [
 
 class Xv6UserTestSuite(TestSuite):
     def start(self, stream: RWStream):
-        stream.writeline("usertests")
-        assert_eq(stream.readline(), "usertests")
-        assert_eq(stream.readline(), "")
-        assert_eq(stream.readline(), "$ usertests starting")
-        print("Usertests was started.")
+        Xv6(stream).run("usertests")
 
     def expect(self, stream: RWStream):
+        assert stream.readline().endswith("usertests starting")
         self.expect_part("quick", stream)
         self.expect_part("slow", stream)
 
@@ -142,7 +142,8 @@ class Xv6UserTestSuite(TestSuite):
             case "slow":
                 tests = SLOW_TESTS
 
-        print(f"Reading test suite '{name}'...")
+        expected_duration = sum(test.timeout.total_seconds() for test in tests)
+        print(f"[ 0%] Running suite '{name}'... Expected duration {expected_duration}s.")
 
         expect(stream, tests)
 
@@ -152,4 +153,4 @@ class Xv6UserTestSuite(TestSuite):
             case "slow":
                 assert_eq(stream.readline(), "ALL TESTS PASSED")
 
-        print(f"Test suite '{name}' was passed!")
+        print(f"[OK ] Test suite '{name}' was passed!")

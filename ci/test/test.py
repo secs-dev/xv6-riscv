@@ -11,6 +11,11 @@ def assert_eq(lhs, rhs):
     assert lhs == rhs
 
 
+def assert_matches(text, pattern):
+    if not re.fullmatch(pattern, text):
+        raise ValueError(f"Unexpected {text = }, expected {pattern = }")
+
+
 class TestResult(NamedTuple):
     duration: timedelta
 
@@ -69,7 +74,6 @@ class PatternTest(Test):
         begin = datetime.now()
         for pattern in self.patterns:
             line = out.readline()
-            if not re.fullmatch(pattern, line):
-                raise ValueError(f"Unexpected {line = }, expected {pattern = }")
+            assert_matches(line, pattern)
         end = datetime.now()
         return TestResult(duration=end - begin)

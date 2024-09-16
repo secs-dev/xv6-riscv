@@ -2,12 +2,18 @@ from datetime import timedelta, datetime
 from argparse import ArgumentParser
 
 from suite.usertests import Xv6UserTestSuite
+from suite.custom import DUMPTESTS, DUMP2TESTS
 from test import assert_eq
 from qemu import Qemu
 
 
 SUITES = {
     "usertests": Xv6UserTestSuite(),
+} | {
+    suite.name: suite for suite in (
+        DUMPTESTS,
+        DUMP2TESTS,
+    )
 }
 
 
@@ -51,10 +57,11 @@ if __name__ == "__main__":
         for suite_name in suites:
             suite = SUITES[suite_name]
 
-            print(f"Starting suite '{suite_name}'...")
+            print(f"[ 0%] Starting suite '{suite_name}'...")
             suite.start(qemu)
 
             suite.expect(qemu)
-            print(f"Suite '{suite_name}' OK!")
+            print(f"[OK ] Suite '{suite_name}' is done!")
+
 
         print("You are cool!")
