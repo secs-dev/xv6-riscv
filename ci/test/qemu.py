@@ -1,7 +1,8 @@
 from subprocess import Popen, PIPE, STDOUT
+from stream import RWStream
 
 
-class Qemu:
+class Qemu(RWStream):
     def __init__(self, cwd="."):
         self.__proccess = None
         self.__cwd = cwd
