@@ -1,4 +1,3 @@
-from datetime import timedelta, datetime
 from argparse import ArgumentParser
 
 from suite.usertests import Xv6UserTestSuite
