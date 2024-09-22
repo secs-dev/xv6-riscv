@@ -10,10 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/vityaman/xv6:latest
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.VITYAMAN_PACKAGE_READ }}
+      image: vityamand/xv6:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
