@@ -3,6 +3,9 @@ name: ci
 on:
   push:
     branches: [ main ]
+    paths:
+      - ".github/workflows/*"
+      - "ci/docker/*"
 
 jobs:
   build:
