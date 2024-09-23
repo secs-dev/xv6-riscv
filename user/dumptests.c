@@ -20,7 +20,7 @@ int main(void)
   printf("dump syscall found. Start testing\n");
   test1();
   test2();
-  test3();
+  test3();  test3();  test3();  test3();  test3();
   test4();
   printf("4 tests were ran\n");
 #endif
