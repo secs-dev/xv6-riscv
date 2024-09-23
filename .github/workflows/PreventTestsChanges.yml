@@ -1,0 +1,25 @@
+name: PreventTestsChanges
+
+on:
+  pull_request:
+    paths:
+      - user/alloctest.c
+      - user/cowtest.c
+      - user/dump2tests.c
+      - user/dumptests.c
+      - user/dump2tests.S
+      - user/dumptests.S
+      - user/forktest.c
+      - user/lazytests.c
+      - user/usertests.c
+
+jobs:
+    prevent-edit-test:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Fail Action
+          uses: actions/github-script@v7
+          with:
+            script: |
+              core.setFailed('You shall not edit tests with no reason!')
+  
