@@ -7,6 +7,8 @@ on:
       - user/cowtest.c
       - user/dump2tests.c
       - user/dumptests.c
+      - user/dump2tests.S
+      - user/dumptests.S
       - user/forktest.c
       - user/lazytests.c
       - user/usertests.c
