@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -e
+K=kernel
 
 cd "$(dirname "$0")"
 cd ../..
