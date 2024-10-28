@@ -4,6 +4,7 @@
 #include "spinlock.h"
 #include "riscv.h"
 #include "defs.h"
+#include "list.h"
 
 // Buddy allocator
 
