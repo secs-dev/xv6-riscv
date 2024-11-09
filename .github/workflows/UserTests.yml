@@ -25,8 +25,14 @@ jobs:
 
       - name: Test Lab 1
         if: ${{ github.head_ref == 'lab-1' }}
-        run: sh ./ci/test/run.sh dumptests dump2tests usertests
-      
+        run: |
+          sh ./ci/test/run.sh \
+            dumptests dumptests \
+            dump2tests dump2tests \
+            usertests \
+            dumptests dumptests \
+            dump2tests dump2tests
+
       - name: Test Lab 2
         if: ${{ github.head_ref == 'lab-2' }}
         run: sh ./ci/test/run.sh alloctest usertests
