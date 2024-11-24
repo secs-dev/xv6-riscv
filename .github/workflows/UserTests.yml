@@ -8,9 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container:
-      image: vityamand/xv6:latest
+    runs-on: self-hosted-xv6
     steps:
       - name: Checkout
         uses: actions/checkout@v4
