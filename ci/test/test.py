@@ -31,7 +31,7 @@ class Test(ABC):
 
 
 class Xv6UserTest(Test):
-    def __init__(self, name: str, timeout: timedelta, 
+    def __init__(self, name: str, timeout: timedelta,
                        suffix_size: int = 0, extra_lines: int = 0):
         super().__init__(name, timeout)
         self.suffix_size = suffix_size
@@ -48,24 +48,25 @@ class Xv6UserTest(Test):
         if not re.fullmatch(pattern, status):
             raise ValueError(f"Unexpected {status = }")
 
-        for i in range(self.extra_lines):
-            out.readline()
-
         if self.is_ok_separated():
-            status = out.readline()
-            if status != "OK":
-                raise ValueError(f"Unexpected {status = }")
+            is_ok = False
+            while line := out.readline():
+                if line == "OK":
+                    is_ok = True
+                    break
+            if not is_ok:
+                raise ValueError(f"Unexpected EOF, expected OK")
 
         end = datetime.now()
 
         return TestResult(duration=end - begin)
-    
+
     def is_ok_separated(self) -> bool:
         return self.extra_lines != 0 or self.name == "outofinodes"
 
 
 class PatternTest(Test):
-    def __init__(self, name: str, timeout: timedelta, 
+    def __init__(self, name: str, timeout: timedelta,
                        patterns: list[str]):
         super().__init__(name, timeout)
         self.patterns = patterns
