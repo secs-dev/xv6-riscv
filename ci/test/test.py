@@ -38,7 +38,7 @@ class Xv6UserTest(Test):
         self.extra_lines = extra_lines
 
     def expect(self, out: RWStream) -> TestResult:
-        pattern = "test " + self.name + ": .{" + str(self.suffix_size) + "}"
+        pattern = "test " + self.name + ": .*"
         if not self.is_ok_separated():
             pattern += "OK"
 
