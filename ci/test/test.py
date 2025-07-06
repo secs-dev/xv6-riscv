@@ -49,12 +49,17 @@ class Xv6UserTest(Test):
             raise ValueError(f"Unexpected {status = }")
 
         if self.is_ok_separated():
+            lines = []
+
             status = "EOF"
             while line := out.readline():
                 if line in ("OK", "FAILED"):
                     status = line
                     break
+                lines.append(f"[DBG] {line}")
+
             if status != "OK":
+                print(*lines, sep="\n")
                 raise ValueError(f"Unexpected {status = }, expected OK")
 
         end = datetime.now()
