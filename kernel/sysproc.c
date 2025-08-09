@@ -43,8 +43,15 @@ sys_sbrk(void)
 
   argint(0, &n);
   addr = myproc()->sz;
-  if(growproc(n) < 0)
-    return -1;
+  if(n < 0) {
+    if(shrinkproc(-n) < 0)
+      return -1;
+  } else {
+    // Lazily allocate memory for this process: increase its memory
+    // size but don't allocate memory. If the processes uses the
+    // memory, vmfault() will allocate it.
+    myproc()->sz += n;
+  }
   return addr;
 }
 

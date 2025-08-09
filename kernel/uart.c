@@ -45,6 +45,7 @@ char uart_tx_buf[UART_TX_BUF_SIZE];
 uint64 uart_tx_w; // write next to uart_tx_buf[uart_tx_w % UART_TX_BUF_SIZE]
 uint64 uart_tx_r; // read next from uart_tx_buf[uart_tx_r % UART_TX_BUF_SIZE]
 
+extern volatile int panicking; // from printf.c
 extern volatile int panicked; // from printf.c
 
 void uartstart();
@@ -86,7 +87,8 @@ uartinit(void)
 void
 uartputc(int c)
 {
-  acquire(&uart_tx_lock);
+  if(panicking == 0)
+    acquire(&uart_tx_lock);
 
   if(panicked){
     for(;;)
@@ -100,7 +102,8 @@ uartputc(int c)
   uart_tx_buf[uart_tx_w % UART_TX_BUF_SIZE] = c;
   uart_tx_w += 1;
   uartstart();
-  release(&uart_tx_lock);
+  if(panicking == 0)
+    release(&uart_tx_lock);
 }
 
 
@@ -111,7 +114,8 @@ uartputc(int c)
 void
 uartputc_sync(int c)
 {
-  push_off();
+  if(panicking == 0)
+    push_off();
 
   if(panicked){
     for(;;)
@@ -123,7 +127,8 @@ uartputc_sync(int c)
     ;
   WriteReg(THR, c);
 
-  pop_off();
+  if(panicking == 0)
+    pop_off();
 }
 
 // if the UART is idle, and a character is waiting
@@ -136,7 +141,6 @@ uartstart()
   while(1){
     if(uart_tx_w == uart_tx_r){
       // transmit buffer is empty.
-      ReadReg(ISR);
       return;
     }
     
@@ -162,7 +166,7 @@ uartstart()
 int
 uartgetc(void)
 {
-  if(ReadReg(LSR) & 0x01){
+  if(ReadReg(LSR) & LSR_RX_READY){
     // input data is ready.
     return ReadReg(RHR);
   } else {
@@ -176,6 +180,8 @@ uartgetc(void)
 void
 uartintr(void)
 {
+  ReadReg(ISR); // acknowledge the interrupt
+
   // read and process incoming characters.
   while(1){
     int c = uartgetc();
@@ -185,7 +191,9 @@ uartintr(void)
   }
 
   // send buffered characters.
-  acquire(&uart_tx_lock);
+  if(panicking == 0)
+    acquire(&uart_tx_lock);
   uartstart();
-  release(&uart_tx_lock);
+  if(panicking == 0)
+    release(&uart_tx_lock);
 }

@@ -215,19 +215,6 @@ proc_freepagetable(pagetable_t pagetable, uint64 sz)
   uvmfree(pagetable, sz);
 }
 
-// a user program that calls exec("/init")
-// assembled from ../user/initcode.S
-// od -t xC ../user/initcode
-uchar initcode[] = {
-  0x17, 0x05, 0x00, 0x00, 0x13, 0x05, 0x45, 0x02,
-  0x97, 0x05, 0x00, 0x00, 0x93, 0x85, 0x35, 0x02,
-  0x93, 0x08, 0x70, 0x00, 0x73, 0x00, 0x00, 0x00,
-  0x93, 0x08, 0x20, 0x00, 0x73, 0x00, 0x00, 0x00,
-  0xef, 0xf0, 0x9f, 0xff, 0x2f, 0x69, 0x6e, 0x69,
-  0x74, 0x00, 0x00, 0x24, 0x00, 0x00, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00
-};
-
 // Set up first user process.
 void
 userinit(void)
@@ -237,16 +224,6 @@ userinit(void)
   p = allocproc();
   initproc = p;
   
-  // allocate one user page and copy initcode's instructions
-  // and data into it.
-  uvmfirst(p->pagetable, initcode, sizeof(initcode));
-  p->sz = PGSIZE;
-
-  // prepare for the very first "return" from kernel to user.
-  p->trapframe->epc = 0;      // user program counter
-  p->trapframe->sp = PGSIZE;  // user stack pointer
-
-  safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
 
   p->state = RUNNABLE;
@@ -254,22 +231,19 @@ userinit(void)
   release(&p->lock);
 }
 
-// Grow or shrink user memory by n bytes.
+// Shrink user memory by n bytes.
 // Return 0 on success, -1 on failure.
 int
-growproc(int n)
+shrinkproc(int n)
 {
   uint64 sz;
   struct proc *p = myproc();
 
+  if(n > p->sz)
+    return -1;
+
   sz = p->sz;
-  if(n > 0){
-    if((sz = uvmalloc(p->pagetable, sz, sz + n, PTE_W)) == 0) {
-      return -1;
-    }
-  } else if(n < 0){
-    sz = uvmdealloc(p->pagetable, sz, sz + n);
-  }
+  sz = uvmdealloc(p->pagetable, sz, sz - n);
   p->sz = sz;
   return 0;
 }
@@ -451,8 +425,11 @@ scheduler(void)
   for(;;){
     // The most recent process to run may have had interrupts
     // turned off; enable them to avoid a deadlock if all
-    // processes are waiting.
+    // processes are waiting. Then turn them back off
+    // to avoid a possible race between an interrupt
+    // and wfi.
     intr_on();
+    intr_off();
 
     int found = 0;
     for(p = proc; p < &proc[NPROC]; p++) {
@@ -474,7 +451,6 @@ scheduler(void)
     }
     if(found == 0) {
       // nothing to run; stop running on this core until an interrupt.
-      intr_on();
       asm volatile("wfi");
     }
   }
@@ -498,7 +474,7 @@ sched(void)
   if(mycpu()->noff != 1)
     panic("sched locks");
   if(p->state == RUNNING)
-    panic("sched running");
+    panic("sched RUNNING");
   if(intr_get())
     panic("sched interruptible");
 
@@ -523,10 +499,12 @@ yield(void)
 void
 forkret(void)
 {
+  extern char userret[];
   static int first = 1;
+  struct proc *p = myproc();
 
   // Still holding p->lock from scheduler.
-  release(&myproc()->lock);
+  release(&p->lock);
 
   if (first) {
     // File system initialization must be run in the context of a
@@ -537,13 +515,24 @@ forkret(void)
     first = 0;
     // ensure other cores see first=0.
     __sync_synchronize();
+
+    // We can invoke exec() now that file system is initialized.
+    // Put the return value (argc) of exec into a0.
+    p->trapframe->a0 = exec("/init", (char *[]){ "/init", 0 });
+    if (p->trapframe->a0 == -1) {
+      panic("exec");
+    }
   }
 
-  usertrapret();
+  // return to user space, mimicing usertrap()'s return.
+  prepare_return();
+  uint64 satp = MAKE_SATP(p->pagetable);
+  uint64 trampoline_userret = TRAMPOLINE + (userret - trampoline);
+  ((void (*)(uint64))trampoline_userret)(satp);
 }
 
-// Atomically release lock and sleep on chan.
-// Reacquires lock when awakened.
+// Sleep on wait channel chan, releasing condition lock lk.
+// Re-acquires lk when awakened.
 void
 sleep(void *chan, struct spinlock *lk)
 {
@@ -573,8 +562,8 @@ sleep(void *chan, struct spinlock *lk)
   acquire(lk);
 }
 
-// Wake up all processes sleeping on chan.
-// Must be called without any p->lock.
+// Wake up all processes sleeping on wait channel chan.
+// Caller should hold the condition lock.
 void
 wakeup(void *chan)
 {
