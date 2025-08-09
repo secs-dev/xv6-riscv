@@ -28,7 +28,9 @@ OBJS = \
   $K/sysfile.o \
   $K/kernelvec.o \
   $K/plic.o \
-  $K/virtio_disk.o
+  $K/virtio_disk.o \
+  $K/buddy.o \
+  $K/list.o
 
 # riscv64-unknown-elf- or riscv64-linux-gnu-
 # perhaps in /opt/riscv/bin
@@ -113,6 +115,16 @@ $U/_forktest: $U/forktest.o $(ULIB)
 	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $U/_forktest $U/forktest.o $U/ulib.o $U/usys.o
 	$(OBJDUMP) -S $U/_forktest > $U/forktest.asm
 
+$U/dumptests.o: $U/dumptests.S $U/dumptests.c $K/syscall.h
+	$(CC) $(CFLAGS) -c -o $U/dumptests.s.o $U/dumptests.S
+	$(CC) $(CFLAGS) -c -o $U/dumptests.c.o $U/dumptests.c
+	$(LD) -r $U/dumptests.c.o $U/dumptests.s.o -o $U/dumptests.o
+
+$U/dump2tests.o: $U/dump2tests.S $U/dump2tests.c $K/syscall.h
+	$(CC) $(CFLAGS) -c -o $U/dump2tests.s.o $U/dump2tests.S
+	$(CC) $(CFLAGS) -c -o $U/dump2tests.c.o $U/dump2tests.c
+	$(LD) -r $U/dump2tests.c.o $U/dump2tests.s.o -o $U/dump2tests.o
+
 mkfs/mkfs: mkfs/mkfs.c $K/fs.h $K/param.h
 	gcc -I. -o mkfs/mkfs mkfs/mkfs.c
 
@@ -139,6 +151,11 @@ UPROGS=\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
+	$U/_dumptests\
+	$U/_dump2tests\
+	$U/_alloctest\
+	$U/_cowtest\
+	$U/_lazytests\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

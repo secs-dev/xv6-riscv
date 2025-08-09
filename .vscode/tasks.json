@@ -1,0 +1,10 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "fix_gdbinit",
+            "type": "shell",
+            "command": "sed -i -e '/^target remote/d' ${workspaceFolder}/.gdbinit"
+        }
+    ]
+}

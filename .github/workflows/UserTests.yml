@@ -1,0 +1,40 @@
+name: UserTests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: vityamand/xv6:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Show the MR info
+        run: |
+          echo "Target branch: '$GITHUB_BASE_REF'"
+          echo "Source branch: '$GITHUB_HEAD_REF'"
+
+      - name: Build
+        run: make && make fs.img
+
+      - name: Test Lab 1
+        if: ${{ github.head_ref == 'lab-1' }}
+        run: sh ./ci/test/run.sh dumptests dump2tests usertests
+      
+      - name: Test Lab 2
+        if: ${{ github.head_ref == 'lab-2' }}
+        run: sh ./ci/test/run.sh alloctest usertests
+
+      - name: Test Lab 3
+        if: ${{ github.head_ref == 'lab-3' }}
+        run: sh ./ci/test/run.sh cowtest lazytests usertests
+
+      - name: Test Basic
+        if: ${{ ! startsWith(github.head_ref, 'lab-') }}
+        run: sh ./ci/test/run.sh usertests
