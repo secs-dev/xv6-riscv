@@ -55,6 +55,7 @@ endif
 QEMU = qemu-system-riscv64
 
 CC = $(TOOLPREFIX)gcc
+CXX = $(TOOLPREFIX)g++
 AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
@@ -83,6 +84,8 @@ CFLAGS += -fno-pie -nopie
 endif
 
 LDFLAGS = -z max-page-size=4096
+CXXFLAGS = $(CFLAGS)
+CXXFLAGS += -fno-exceptions -nostdlib++ -std=c++20
 
 $K/kernel: $(OBJS) $K/kernel.ld $U/initcode
 	$(LD) $(LDFLAGS) -T $K/kernel.ld -o $K/kernel $(OBJS) 
