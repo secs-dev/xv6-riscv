@@ -1,3 +1,8 @@
+#ifndef KERNEL_DEFS_H
+#define KERNEL_DEFS_H
+
+#include "kernel/types.h"
+
 struct buf;
 struct context;
 struct file;
@@ -9,6 +14,7 @@ struct sleeplock;
 struct stat;
 struct superblock;
 struct list;
+struct pagetable_t;
 
 // bio.c
 void            binit(void);
@@ -25,6 +31,9 @@ void            consputc(int);
 
 // exec.c
 int             exec(char*, char**);
+
+// dump.c
+void            dump(void);
 
 // file.c
 struct file*    filealloc(void);
@@ -78,7 +87,7 @@ int             piperead(struct pipe*, uint64, int);
 int             pipewrite(struct pipe*, uint64, int);
 
 // printf.c
-int            printf(char*, ...) __attribute__ ((format (printf, 1, 2)));
+int             printf(const char*, ...) __attribute__ ((format (printf, 1, 2)));
 void            panic(char*) __attribute__((noreturn));
 void            printfinit(void);
 
@@ -202,4 +211,4 @@ void           bd_init(void*,void*);
 void           bd_free(void*);
 void           *bd_malloc(uint64);
 
-
+#endif /* KERNEL_DEFS_H */

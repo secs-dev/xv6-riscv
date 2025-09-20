@@ -61,7 +61,7 @@ printptr(uint64 x)
 
 // Print to the console.
 int
-printf(char *fmt, ...)
+printf(const char *fmt, ...)
 {
   va_list ap;
   int i, cx, c0, c1, c2, locking;

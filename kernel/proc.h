@@ -1,3 +1,11 @@
+#ifndef KERNEL_PROC_H
+#define KERNEL_PROC_H
+
+#include "kernel/types.h"
+#include "kernel/param.h"
+#include "kernel/riscv.h"
+#include "kernel/spinlock.h"
+
 // Saved registers for kernel context switches.
 struct context {
   uint64 ra;
@@ -105,3 +113,5 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 };
+
+#endif /* KERNEL_PROC_H */

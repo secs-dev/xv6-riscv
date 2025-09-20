@@ -1,3 +1,6 @@
+#ifndef USER_USER_H
+#define USER_USER_H
+
 struct stat;
 
 // system calls
@@ -41,3 +44,5 @@ void *memcpy(void *, const void *, uint);
 // umalloc.c
 void* malloc(uint);
 void free(void*);
+
+#endif /* USER_USER_H */
