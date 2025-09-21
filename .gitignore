@@ -15,6 +15,7 @@ mkfs
 kernel/kernel
 user/usys.S
 .gdbinit
+TAGS
 
 # Clangd
 compile_commands.json
