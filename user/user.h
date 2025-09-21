@@ -1,6 +1,8 @@
 #ifndef USER_USER_H
 #define USER_USER_H
 
+#include <kernel/types.h>
+
 struct stat;
 
 // system calls
@@ -26,6 +28,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 void dump(void);
+int dump2(int pid, int register_num, uint64 *return_value);
 
 // ulib.c
 int stat(const char*, struct stat*);

@@ -2,6 +2,7 @@
 #define KERNEL_DEFS_H
 
 #include "kernel/types.h"
+#include "kernel/riscv.h"
 
 struct buf;
 struct context;
@@ -14,7 +15,6 @@ struct sleeplock;
 struct stat;
 struct superblock;
 struct list;
-struct pagetable_t;
 
 // bio.c
 void            binit(void);
@@ -34,6 +34,9 @@ int             exec(char*, char**);
 
 // dump.c
 void            dump(void);
+
+// dump2.c
+int             dump2(int pid, int register_num, uint64 *return_value);
 
 // file.c
 struct file*    filealloc(void);

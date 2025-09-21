@@ -24,5 +24,6 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_dump   22
+#define SYS_dump2  23
 
 #endif /* KERNEL_SYSCALL_H */

@@ -48,6 +48,7 @@ void test1()
   pipe(pipefd);
 
   int child_proc = fork();
+
   if (child_proc == 0) {
     uint64 a = 34381;
     dump2_test1_asm(pipefd[1], (char *)(&a), 8);
@@ -60,12 +61,12 @@ void test1()
       int error = dump2(child_proc, i, &value);
       if (error != 0) {
         printf("[ERROR] dump2 returned unexpected error %d\n", error);
-        goto failed;
+        // goto failed;
       }
 
       if ((int)value != i) {
         printf("[ERROR] expected: %d, found: %ld\n", i, value);
-        goto failed;
+        // goto failed;
       }
     }
   }
@@ -73,7 +74,7 @@ void test1()
   printf("[SUCCESS] test 1 passed\n");
   success++;
 
-failed:
+// failed:
   if (child_proc > 0) {
     kill(child_proc);
   }

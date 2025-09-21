@@ -31,7 +31,8 @@ OBJS = \
   $K/virtio_disk.o \
   $K/buddy.o \
   $K/list.o \
-  $K/dump.o
+  $K/dump.o \
+  $K/dump2.o
 
 # riscv64-unknown-elf- or riscv64-linux-gnu-
 # perhaps in /opt/riscv/bin
