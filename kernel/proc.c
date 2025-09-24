@@ -5,6 +5,8 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include <stddef.h>
+#include <stdint.h>
 
 struct cpu cpus[NCPU];
 
@@ -692,4 +694,58 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+
+int 
+dump(void)
+{
+  struct trapframe* process_frame = myproc()->trapframe;
+  uint64* begin = &process_frame->s2;
+  for (int i = 0; i < 10; i++)
+  {
+    printf("s%d = %d\n", 2 + i, (int32_t)*(begin + i));
+  }
+  return 0;
+}
+
+int 
+dump2(int pid, int register_num, uint64 addr)
+{
+  enum return_state {
+    NOT_ALLOWED = -1,
+    NO_SUCH_PROCESS = -2,
+    INCORRECT_REGISTER = -3,
+    INCORRECT_ADDRESS = -4
+  };
+  if (register_num > 11 || register_num < 2) {
+    return INCORRECT_REGISTER;
+  }
+  struct proc *current = myproc();
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+    if(p->pid == pid) {
+      goto found;
+    } else {
+      release(&p->lock);
+    }
+  }
+  return NO_SUCH_PROCESS;
+found:
+  acquire(&wait_lock);
+  if (current->pid != p->pid && current->pid != p->parent->pid) {
+    release(&wait_lock);
+    release(&p->lock);
+    return NOT_ALLOWED;
+  }
+  uint64* reg = &(p->trapframe->s2) + (register_num - 2);
+  if(copyout(current->pagetable, addr, (char *)reg, sizeof(uint64)) == -1) {
+    release(&wait_lock);
+    release(&p->lock);
+    return INCORRECT_ADDRESS;
+  }
+  release(&wait_lock);
+  release(&p->lock);
+  return 0;
 }
