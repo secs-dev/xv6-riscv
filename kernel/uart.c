@@ -127,8 +127,8 @@ uartputc_sync(int c)
 int
 uartgetc(void)
 {
+  // is input ready?
   if(ReadReg(LSR) & LSR_RX_READY){
-    // input data is ready.
     return ReadReg(RHR);
   } else {
     return -1;
