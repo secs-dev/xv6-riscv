@@ -548,8 +548,6 @@ sleep_prepare(void *chan)
   acquire(&p->lock);
   if (chan == 0)
     panic("sleep_prepare: zero chan");
-  if (p->chan != 0)
-    panic("sleep_prepare: already prepared");
   p->chan = chan;
   release(&p->lock);
 }
