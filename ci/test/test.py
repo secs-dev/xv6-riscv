@@ -38,29 +38,40 @@ class Xv6UserTest(Test):
         self.extra_lines = extra_lines
 
     def expect(self, out: RWStream) -> TestResult:
-        pattern = "test " + self.name + ": .*"
-        if not self.is_ok_separated():
-            pattern += "OK"
+        escaped_name = re.escape(self.name)
+        pattern_inline = rf"test {escaped_name}: .*OK\s*$"
+        pattern_start = rf"test {escaped_name}: .*"
 
         begin = datetime.now()
+        first = out.readline()
+        if first is None:
+            raise ValueError("Unexpected EOF while waiting for test status")
+        first_stripped = first.rstrip("\r\n")
 
-        status = out.readline()
-        if not re.fullmatch(pattern, status):
-            raise ValueError(f"Unexpected {status = }")
+        if re.fullmatch(pattern_inline, first_stripped):
+            end = datetime.now()
+            return TestResult(duration=end - begin)
 
-        if self.is_ok_separated():
-            lines = []
+        if not re.fullmatch(pattern_start, first_stripped):
+            raise ValueError(f"Unexpected {first = }")
 
-            status = "EOF"
-            while line := out.readline():
-                if line in ("OK", "FAILED"):
-                    status = line
-                    break
-                lines.append(f"[DBG] {line}")
+        debug_lines = []
+        status = None
 
-            if status != "OK":
-                print(*lines, sep="\n")
-                raise ValueError(f"Unexpected {status = }, expected OK")
+        while True:
+            line = out.readline()
+            if line is None:
+                raise ValueError("Unexpected EOF while waiting for OK/FAILED")
+            token = line.strip()
+            if token == "OK" or token == "FAILED":
+                status = token
+                break
+            debug_lines.append(line.rstrip("\r\n"))
+
+        if status != "OK":
+            if debug_lines:
+                print(*debug_lines, sep="\n")
+            raise ValueError(f"Unexpected {status = }, expected OK")
 
         end = datetime.now()
 
