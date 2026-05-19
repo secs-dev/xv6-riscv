@@ -520,7 +520,7 @@ forkret(void)
 
     first = 0;
     // ensure other cores see first=0.
-    __sync_synchronize();
+    __atomic_thread_fence(__ATOMIC_SEQ_CST);
 
     // We can invoke kexec() now that file system is initialized.
     // Put the return value (argc) of kexec into a0.
