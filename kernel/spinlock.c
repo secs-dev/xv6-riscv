@@ -25,18 +25,17 @@ acquire(struct spinlock *lk)
   if(holding(lk))
     panic("acquire");
 
-  // On RISC-V, sync_lock_test_and_set turns into an atomic swap:
+  // On RISC-V, __atomic_exchange_n turns into an atomic swap:
   //   a5 = 1
   //   s1 = &lk->locked
   //   amoswap.w.aq a5, a5, (s1)
-  while(__atomic_exchange_n(&lk->locked, 1, __ATOMIC_ACQUIRE) != 0)
-    ;
-
-  // Tell the C compiler and the processor to not move loads or stores
+  //
+  // Passing __ATOMIC_ACQUIRE to __atomic_exchange_n tells
+  // the C compiler and the processor to not move loads or stores
   // past this point, to ensure that the critical section's memory
   // references happen strictly after the lock is acquired.
-  // On RISC-V, this emits a fence instruction.
-  __atomic_thread_fence(__ATOMIC_SEQ_CST);
+  while(__atomic_exchange_n(&lk->locked, 1, __ATOMIC_ACQUIRE) != 0)
+    ;
 
   // Record info about lock acquisition for holding() and debugging.
   lk->cpu = mycpu();
@@ -51,21 +50,25 @@ release(struct spinlock *lk)
 
   lk->cpu = 0;
 
-  // Tell the C compiler and the CPU to not move loads or stores
-  // past this point, to ensure that all the stores in the critical
-  // section are visible to other CPUs before the lock is released,
-  // and that loads in the critical section occur strictly before
-  // the lock is released.
-  // On RISC-V, this emits a fence instruction.
-  __atomic_thread_fence(__ATOMIC_SEQ_CST);
-
   // Release the lock, equivalent to lk->locked = 0.
+  //
   // This code doesn't use a C assignment, since the C standard
   // implies that an assignment might be implemented with
   // multiple store instructions.
-  // On RISC-V, sync_lock_release turns into an atomic swap:
+  //
+  // On RISC-V, __atomic_store_n turns into a single atomic store:
   //   s1 = &lk->locked
-  //   amoswap.w zero, zero, (s1)
+  //   sw zero,0(s1)
+  //
+  // The __ATOMIC_RELEASE argument to __atomic_store_n tells the
+  // the C compiler and the CPU to not move loads or stores past
+  // this point, to ensure that all the stores in the critical
+  // section are visible to other CPUs before the lock is released,
+  // and that loads in the critical section occur strictly before
+  // the lock is released.
+  //
+  // On RISC-V, this generates a fence instruction before the store:
+  //   fence rw,w
   __atomic_store_n(&lk->locked, 0, __ATOMIC_RELEASE);
 
   pop_off();
