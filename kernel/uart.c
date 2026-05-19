@@ -124,7 +124,7 @@ uartputc_sync(int c)
 
 // try to read one input character from the UART.
 // return -1 if none is waiting.
-int
+static int
 uartgetc(void)
 {
   // is input ready?
