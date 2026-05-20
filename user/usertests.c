@@ -692,18 +692,23 @@ exectest(char *s)
      exit(1);
   }
   if(pid == 0) {
+    int errfd = dup(1);
+    if(errfd < 0) {
+      printf("%s: dup failed\n", s);
+      exit(1);
+    }
     close(1);
     fd = open("echo-ok", O_CREATE|O_WRONLY);
     if(fd < 0) {
-      printf("%s: create failed\n", s);
+      fprintf(errfd, "%s: create failed\n", s);
       exit(1);
     }
     if(fd != 1) {
-      printf("%s: wrong fd\n", s);
+      fprintf(errfd, "%s: wrong fd\n", s);
       exit(1);
     }
     if(exec("echo", echoargv) < 0){
-      printf("%s: exec echo failed\n", s);
+      fprintf(errfd, "%s: exec echo failed\n", s);
       exit(1);
     }
     // won't get to here
@@ -711,8 +716,10 @@ exectest(char *s)
   if (wait(&xstatus) != pid) {
     printf("%s: wait failed!\n", s);
   }
-  if(xstatus != 0)
-    exit(xstatus);
+  if(xstatus != 0) {
+    printf("%s: nonzero wait status %d\n", s, xstatus);
+    exit(1);
+  }
 
   fd = open("echo-ok", O_RDONLY);
   if(fd < 0) {
