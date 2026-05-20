@@ -86,7 +86,7 @@ uartwrite(char buf[], int n)
     while (tx_busy != 0) {
       // wait for a UART transmit-complete interrupt
       // to set tx_busy to 0.
-      sleep(&tx_chan, &tx_lock);
+      sleep_on(&tx_chan, &tx_lock);
     }
 
     WriteReg(THR, buf[i]);

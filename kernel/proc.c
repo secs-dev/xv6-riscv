@@ -410,7 +410,10 @@ kwait(uint64 addr)
     }
 
     // Wait for a child to exit.
-    sleep(p, &wait_lock); //DOC: wait-sleep
+    sleep_prepare(p); //DOC: wait-sleep
+    release(&wait_lock);
+    sleep();
+    acquire(&wait_lock);
   }
 }
 
@@ -536,52 +539,57 @@ forkret(void)
   ((void (*)(uint64))trampoline_userret)(satp);
 }
 
-// Sleep on channel chan, releasing condition lock lk.
-// Re-acquires lk when awakened.
+// Register current process as waiting for wakeups on chan.
 void
-sleep(void *chan, struct spinlock *lk)
+sleep_prepare(void *chan)
 {
   struct proc *p = myproc();
 
-  // Must acquire p->lock in order to
-  // change p->state and then call sched.
-  // Once we hold p->lock, we can be
-  // guaranteed that we won't miss any wakeup
-  // (wakeup locks p->lock),
-  // so it's okay to release lk.
-
-  acquire(&p->lock); //DOC: sleeplock1
-  release(lk);
-
-  // Go to sleep.
+  acquire(&p->lock);
+  if (chan == 0)
+    panic("sleep_prepare: zero chan");
+  if (p->chan != 0)
+    panic("sleep_prepare: already prepared");
   p->chan = chan;
-  p->state = SLEEPING;
-
-  sched();
-
-  // Tidy up.
-  p->chan = 0;
-
-  // Reacquire original lock.
   release(&p->lock);
-  acquire(lk);
+}
+
+// Put the thread to sleep.  Assumes sleep_prepare() was called before.
+// If the channel registered by sleep_prepare() has been woken up in
+// the meantime, do not go to sleep, and instead return immediately.
+void
+sleep(void)
+{
+  struct proc *p = myproc();
+
+  acquire(&p->lock);
+  if (p->chan != 0) {
+    p->state = SLEEPING;
+    sched();
+  }
+  release(&p->lock);
 }
 
 // Wake up all processes sleeping on channel chan.
-// Caller should hold the condition lock.
 void
 wakeup(void *chan)
 {
   struct proc *p;
 
   for (p = proc; p < &proc[NPROC]; p++) {
-    if (p != myproc()) {
-      acquire(&p->lock);
-      if (p->state == SLEEPING && p->chan == chan) {
+    acquire(&p->lock);
+    if (p->chan == chan) {
+      // If the process is waiting for wakeups on this channel,
+      // signal that the wakeup happened by clearing p->chan.
+      p->chan = 0;
+
+      // If this waiting process has gotten so far as to actually
+      // go to sleep, also set it back to RUNNING.
+      if (p->state == SLEEPING) {
         p->state = RUNNABLE;
       }
-      release(&p->lock);
     }
+    release(&p->lock);
   }
 }
 
