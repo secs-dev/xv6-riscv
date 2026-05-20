@@ -196,4 +196,4 @@ check-qemu-version:
 
 .PHONY: fmt
 fmt:
-	clang-format -i $(wildcard user/*.c mkfs/*.c kernel/*.c)
+	clang-format -i $(wildcard kernel/*.[ch] user/*.[ch] mkfs/*.c)
