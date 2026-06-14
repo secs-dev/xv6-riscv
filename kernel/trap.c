@@ -73,8 +73,8 @@ usertrap(void)
                0) {
     // page fault on lazily-allocated page
   } else {
-    printf("usertrap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
-    printf("            sepc=0x%lx stval=0x%lx\n", r_sepc(), r_stval());
+    printk("usertrap(): unexpected scause 0x%lx pid=%d\n", r_scause(), p->pid);
+    printk("            sepc=0x%lx stval=0x%lx\n", r_sepc(), r_stval());
     setkilled(p);
   }
 
@@ -148,7 +148,7 @@ kerneltrap()
 
   if ((which_dev = devintr()) == 0) {
     // interrupt or trap from an unknown source
-    printf("scause=0x%lx sepc=0x%lx stval=0x%lx\n", scause, r_sepc(),
+    printk("scause=0x%lx sepc=0x%lx stval=0x%lx\n", scause, r_sepc(),
            r_stval());
     panic("kerneltrap");
   }
@@ -200,7 +200,7 @@ devintr()
     } else if (irq == VIRTIO0_IRQ) {
       virtio_disk_intr();
     } else if (irq) {
-      printf("unexpected interrupt irq=%d\n", irq);
+      printk("unexpected interrupt irq=%d\n", irq);
     }
 
     // the PLIC allows each device to raise at most one

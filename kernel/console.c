@@ -28,7 +28,7 @@
 //
 // send one character to the uart, but don't use
 // interrupts or sleep(). safe to be called from
-// interrupts, e.g. by printf and to echo input
+// interrupts, e.g. by printk and to echo input
 // characters.
 //
 void

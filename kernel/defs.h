@@ -73,10 +73,10 @@ void            pipeclose(struct pipe*, int);
 int             piperead(struct pipe*, uint64, int);
 int             pipewrite(struct pipe*, uint64, int);
 
-// printf.c
-int             printf(char*, ...) __attribute__ ((format (printf, 1, 2)));
+// printk.c
+int             printk(char*, ...) __attribute__ ((format (printf, 1, 2)));
 void            panic(char*) __attribute__((noreturn));
-void            printfinit(void);
+void            printkinit(void);
 
 // proc.c
 int             cpuid(void);

@@ -42,8 +42,8 @@ static struct spinlock tx_lock;
 static int tx_busy; // is the UART busy sending?
 static int tx_chan; // &tx_chan is the "wait channel"
 
-extern volatile int panicking; // from printf.c
-extern volatile int panicked;  // from printf.c
+extern volatile int panicking; // from printk.c
+extern volatile int panicked;  // from printk.c
 
 void
 uartinit(void)
@@ -98,7 +98,7 @@ uartwrite(char buf[], int n)
 }
 
 // write a byte to the uart without using
-// interrupts, for use by kernel printf() and
+// interrupts, for use by kernel printk() and
 // to echo characters. it spins waiting for the uart's
 // output register to be empty.
 void
