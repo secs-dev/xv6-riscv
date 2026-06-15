@@ -43,6 +43,7 @@ struct log {
   int outstanding; // how many FS sys calls are executing.
   int committing;  // in commit(), please wait.
   int dev;
+  int ncommit;
   struct logheader lh;
 };
 struct log log;
@@ -170,6 +171,7 @@ end_op(void)
     commit();
     acquire(&log.lock);
     log.committing = 0;
+    log.ncommit += 1;
     wakeup(&log);
     release(&log.lock);
   }
@@ -233,4 +235,18 @@ log_write(struct buf *b)
     log.lh.n++;
   }
   release(&log.lock);
+}
+
+uint64
+sys_sync(void)
+{
+  acquire(&log.lock);
+  if (log.committing || log.outstanding > 0) {
+    int n = log.ncommit + 1;
+    while (log.ncommit < n) {
+      sleep(&log, &log.lock);
+    }
+  }
+  release(&log.lock);
+  return 0;
 }
