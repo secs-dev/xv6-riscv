@@ -25,16 +25,18 @@ jobs:
 
       - name: Test Lab 1
         if: ${{ github.head_ref == 'lab-1' }}
-        run: sh ./ci/test/run.sh dumptests dump2tests usertests
+        run: sh ./ci/test/run.sh dumptests dump2tests
 
       - name: Test Lab 2
         if: ${{ github.head_ref == 'lab-2' }}
-        run: sh ./ci/test/run.sh alloctest usertests
+        run: sh ./ci/test/run.sh alloctest
 
       - name: Test Lab 3
         if: ${{ github.head_ref == 'lab-3' }}
-        run: sh ./ci/test/run.sh cowtest lazytests usertests
+        run: sh ./ci/test/run.sh cowtest lazytests
+
+      - name: Test Basic Quick
+        run: ./test-xv6.py -q usertests
 
       - name: Test Basic
-        if: ${{ ! startsWith(github.head_ref, 'lab-') }}
-        run: sh ./ci/test/run.sh usertests
+        run: ./test-xv6.py usertests
