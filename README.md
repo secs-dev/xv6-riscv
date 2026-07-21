@@ -15,3 +15,4 @@
 2. [Задание 2. Аллокатор](/doc/lab/2.md)
 
 3. [Задание 3. Copy-on-write fork](/doc/lab/3.md)
+
