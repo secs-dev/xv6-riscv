@@ -9,7 +9,8 @@ void test3();
 void test4();
 #endif
 
-int main(void) 
+int
+main(void)
 {
   printf("dump tests started\n");
 #ifndef SYS_dump
@@ -32,7 +33,9 @@ no_dump:
 
 #ifdef SYS_dump
 
-void test1() {
+void
+test1()
+{
   printf("#####################\n");
   printf("#                   #\n");
   printf("#   initial state   #\n");
@@ -43,7 +46,9 @@ void test1() {
 
 int dump_test2_asm();
 
-void test2() {
+void
+test2()
+{
   printf("#####################\n");
   printf("#                   #\n");
   printf("#       test 1      #\n");
@@ -69,7 +74,9 @@ void test2() {
 
 int dump_test3_asm();
 
-void test3() {
+void
+test3()
+{
   printf("#####################\n");
   printf("#                   #\n");
   printf("#      test 2       #\n");
@@ -95,7 +102,9 @@ void test3() {
 
 int dump_test4_asm();
 
-void test4() {
+void
+test4()
+{
   printf("#####################\n");
   printf("#                   #\n");
   printf("#      test 3       #\n");

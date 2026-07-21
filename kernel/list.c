@@ -19,19 +19,22 @@ lst_init(struct list *lst)
 }
 
 int
-lst_empty(struct list *lst) {
+lst_empty(struct list *lst)
+{
   return lst->next == lst;
 }
 
 void
-lst_remove(struct list *e) {
+lst_remove(struct list *e)
+{
   e->prev->next = e->next;
   e->next->prev = e->prev;
 }
 
-void*
-lst_pop(struct list *lst) {
-  if(lst->next == lst)
+void *
+lst_pop(struct list *lst)
+{
+  if (lst->next == lst)
     panic("lst_pop");
   struct list *p = lst->next;
   lst_remove(p);
@@ -41,7 +44,7 @@ lst_pop(struct list *lst) {
 void
 lst_push(struct list *lst, void *p)
 {
-  struct list *e = (struct list *) p;
+  struct list *e = (struct list *)p;
   e->next = lst->next;
   e->prev = lst;
   lst->next->prev = p;
@@ -52,8 +55,7 @@ void
 lst_print(struct list *lst)
 {
   for (struct list *p = lst->next; p != lst; p = p->next) {
-    printf(" %p", p);
+    printk(" %p", p);
   }
-  printf("\n");
+  printk("\n");
 }
-

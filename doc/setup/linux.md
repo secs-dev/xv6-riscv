@@ -13,7 +13,7 @@
 Скачать его можно с DockerHub: [vityamand/xv6][3].
 
 ```bash
-docker pull vityamand/xv6
+docker pull --platform linux/amd64 vityamand/xv6
 ```
 
 Также мы можете собрать образ самостоятельно.

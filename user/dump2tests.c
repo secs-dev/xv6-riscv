@@ -11,7 +11,8 @@ void test3();
 void test4();
 #endif
 
-int main(void) 
+int
+main(void)
 {
   printf("dump2 tests started\n");
 
@@ -40,7 +41,8 @@ no_dump2:
 #ifdef SYS_dump2
 int dump2_test1_asm(int pipefd, char *str, int len);
 
-void test1() 
+void
+test1()
 {
   printf("test 1 started\n");
 
@@ -83,7 +85,8 @@ failed:
 
 int dump2_test2_asm(int pipefd, char *str, int len);
 
-void test2() 
+void
+test2()
 {
   printf("test 2 started\n");
   int pipefd[2];
@@ -120,7 +123,9 @@ failed:
 
 int dump2_test3_asm(int pid, uint64 *ptr);
 
-void test3() {
+void
+test3()
+{
   printf("test 3 started\n");
 
   uint64 value;
@@ -135,7 +140,7 @@ void test3() {
     printf("[ERROR] expected: 1337, found: %ld", value);
     goto failed;
   }
-  
+
   printf("[SUCCESS] test 3 passed\n");
   success++;
 
@@ -143,7 +148,8 @@ failed:
   printf("test 3 finished\n");
 }
 
-void test4() 
+void
+test4()
 {
   printf("test 4 started\n");
 

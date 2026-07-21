@@ -14,9 +14,9 @@ void
 sparse_memory(char *s)
 {
   char *i, *prev_end, *new_end;
-  
+
   prev_end = sbrk(REGION_SZ);
-  if (prev_end == (char*)0xffffffffffffffffL) {
+  if (prev_end == (char *)0xffffffffffffffffL) {
     printf("sbrk() failed\n");
     exit(1);
   }
@@ -42,7 +42,7 @@ sparse_memory_unmap(char *s)
   char *i, *prev_end, *new_end;
 
   prev_end = sbrk(REGION_SZ);
-  if (prev_end == (char*)0xffffffffffffffffL) {
+  if (prev_end == (char *)0xffffffffffffffffL) {
     printf("sbrk() failed\n");
     exit(1);
   }
@@ -79,10 +79,10 @@ oom(char *s)
   void *m1, *m2;
   int pid;
 
-  if((pid = fork()) == 0){
+  if ((pid = fork()) == 0) {
     m1 = 0;
-    while((m2 = malloc(4096*4096)) != 0){
-      *(char**)m2 = m1;
+    while ((m2 = malloc(4096 * 4096)) != 0) {
+      *(char **)m2 = m1;
       m1 = m2;
     }
     exit(0);
@@ -96,21 +96,22 @@ oom(char *s)
 // run each test in its own process. run returns 1 if child's exit()
 // indicates success.
 int
-run(void f(char *), char *s) {
+run(void f(char *), char *s)
+{
   int pid;
   int xstatus;
-  
+
   printf("running test %s\n", s);
-  if((pid = fork()) < 0) {
+  if ((pid = fork()) < 0) {
     printf("runtest: fork error\n");
     exit(1);
   }
-  if(pid == 0) {
+  if (pid == 0) {
     f(s);
     exit(0);
   } else {
     wait(&xstatus);
-    if(xstatus != 0) 
+    if (xstatus != 0)
       printf("test %s: FAILED\n", s);
     else
       printf("test %s: OK\n", s);
@@ -122,32 +123,32 @@ int
 main(int argc, char *argv[])
 {
   char *n = 0;
-  if(argc > 1) {
+  if (argc > 1) {
     n = argv[1];
   }
-  
+
   struct test {
     void (*f)(char *);
     char *s;
   } tests[] = {
-    { sparse_memory, "lazy alloc"},
-    { sparse_memory_unmap, "lazy unmap"},
-    { oom, "out of memory"},
-    { 0, 0},
+    {sparse_memory, "lazy alloc"},
+    {sparse_memory_unmap, "lazy unmap"},
+    {oom, "out of memory"},
+    {0, 0},
   };
-    
+
   printf("lazytests starting\n");
 
   int fail = 0;
   for (struct test *t = tests; t->s != 0; t++) {
-    if((n == 0) || strcmp(t->s, n) == 0) {
-      if(!run(t->f, t->s))
+    if ((n == 0) || strcmp(t->s, n) == 0) {
+      if (!run(t->f, t->s))
         fail = 1;
     }
   }
-  if(!fail)
+  if (!fail)
     printf("ALL TESTS PASSED\n");
   else
     printf("SOME TESTS FAILED\n");
-  exit(1);   // not reached.
+  exit(1); // not reached.
 }

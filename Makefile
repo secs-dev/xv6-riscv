@@ -214,4 +214,7 @@ check-qemu-version:
 
 .PHONY: fmt
 fmt:
-	clang-format -i $(wildcard kernel/*.[ch] user/*.[ch] mkfs/*.c)
+	clang-format-22 -i $(wildcard kernel/*.[ch] user/*.[ch] mkfs/*.c)
+
+fmt-check:
+	clang-format-22 --dry-run --Werror $(wildcard kernel/*.[ch] user/*.[ch] mkfs/*.c)

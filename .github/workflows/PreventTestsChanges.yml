@@ -22,4 +22,3 @@ jobs:
           with:
             script: |
               core.setFailed('You shall not edit tests with no reason!')
-  

@@ -1,5 +1,5 @@
 SortIncludes: Never
-ReflowComments: Never
+ReflowComments: false
 
 BreakAfterReturnType: TopLevelDefinitions
 BreakBeforeBraces: Custom

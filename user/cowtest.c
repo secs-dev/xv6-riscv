@@ -12,21 +12,22 @@
 // allocate more than half of physical memory,
 // then fork. this will fail in the default
 // kernel, which does not support copy-on-write.
-void simpletest() 
+void
+simpletest()
 {
   uint64 phys_size = PHYSTOP - KERNBASE;
   int sz = (phys_size / 3) * 2;
 
   printf("simple: ");
 
-  char* p = sbrk(sz);
-  if (p == (char*)0xffffffffffffffffL) {
+  char *p = sbrk(sz);
+  if (p == (char *)0xffffffffffffffffL) {
     printf("sbrk(%d) failed\n", sz);
     exit(-1);
   }
 
-  for (char* q = p; q < p + sz; q += 4096) {
-    *(int*)q = getpid();
+  for (char *q = p; q < p + sz; q += 4096) {
+    *(int *)q = getpid();
   }
 
   int pid = fork();
@@ -40,7 +41,7 @@ void simpletest()
 
   wait(0);
 
-  if (sbrk(-sz) == (char*)0xffffffffffffffffL) {
+  if (sbrk(-sz) == (char *)0xffffffffffffffffL) {
     printf("sbrk(-%d) failed\n", sz);
     exit(-1);
   }
@@ -52,7 +53,8 @@ void simpletest()
 // this causes more than half of physical memory
 // to be allocated, so it also checks whether
 // copied pages are freed.
-void threetest() 
+void
+threetest()
 {
   uint64 phys_size = PHYSTOP - KERNBASE;
   int sz = phys_size / 4;
@@ -60,8 +62,8 @@ void threetest()
 
   printf("three: ");
 
-  char* p = sbrk(sz);
-  if (p == (char*)0xffffffffffffffffL) {
+  char *p = sbrk(sz);
+  if (p == (char *)0xffffffffffffffffL) {
     printf("sbrk(%d) failed\n", sz);
     exit(-1);
   }
@@ -78,39 +80,39 @@ void threetest()
       exit(-1);
     }
     if (pid2 == 0) {
-      for (char* q = p; q < p + (sz / 5) * 4; q += 4096) {
-        *(int*)q = getpid();
+      for (char *q = p; q < p + (sz / 5) * 4; q += 4096) {
+        *(int *)q = getpid();
       }
-      for (char* q = p; q < p + (sz / 5) * 4; q += 4096) {
-        if (*(int*)q != getpid()) {
+      for (char *q = p; q < p + (sz / 5) * 4; q += 4096) {
+        if (*(int *)q != getpid()) {
           printf("wrong content\n");
           exit(-1);
         }
       }
       exit(-1);
     }
-    for (char* q = p; q < p + (sz / 2); q += 4096) {
-      *(int*)q = 9999;
+    for (char *q = p; q < p + (sz / 2); q += 4096) {
+      *(int *)q = 9999;
     }
     exit(0);
   }
 
-  for (char* q = p; q < p + sz; q += 4096) {
-    *(int*)q = getpid();
+  for (char *q = p; q < p + sz; q += 4096) {
+    *(int *)q = getpid();
   }
 
   wait(0);
 
-  sleep(2);
+  pause(2);
 
-  for (char* q = p; q < p + sz; q += 4096) {
-    if (*(int*)q != getpid()) {
+  for (char *q = p; q < p + sz; q += 4096) {
+    if (*(int *)q != getpid()) {
       printf("wrong content\n");
       exit(-1);
     }
   }
 
-  if (sbrk(-sz) == (char*)0xffffffffffffffffL) {
+  if (sbrk(-sz) == (char *)0xffffffffffffffffL) {
     printf("sbrk(-%d) failed\n", sz);
     exit(-1);
   }
@@ -125,7 +127,8 @@ char buf[4096];
 char junk3[4096];
 
 // test whether copyout() simulates COW faults.
-void filetest() 
+void
+filetest()
 {
   printf("file: ");
 
@@ -144,7 +147,7 @@ void filetest()
     }
 
     if (pid == 0) {
-      sleep(10);
+      pause(10);
 
       const int rad = read(fds[0], buf, sizeof(i));
       if (rad != sizeof(i)) {
@@ -152,9 +155,9 @@ void filetest()
         exit(1);
       }
 
-      sleep(10);
+      pause(10);
 
-      int j = *(int*)buf;
+      int j = *(int *)buf;
       if (j != i) {
         printf("error: read the wrong value %d != %d\n", j, i);
         exit(1);
@@ -185,7 +188,8 @@ void filetest()
   printf("ok\n");
 }
 
-int main(int argc, char* argv[]) 
+int
+main(int argc, char *argv[])
 {
   (void)argc;
   (void)argv;
