@@ -16,6 +16,7 @@ jobs:
           password: ${{ secrets.VITYAMAND_DOCKERHUB_RW }}
 
       - name: Build and push
+        working-directory: ./ci/docker
         uses: docker/build-push-action@v6
         with:
           push: true
