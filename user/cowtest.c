@@ -12,7 +12,7 @@
 // allocate more than half of physical memory,
 // then fork. this will fail in the default
 // kernel, which does not support copy-on-write.
-void simpletest() 
+void simpletest()
 {
   uint64 phys_size = PHYSTOP - KERNBASE;
   int sz = (phys_size / 3) * 2;
@@ -52,7 +52,7 @@ void simpletest()
 // this causes more than half of physical memory
 // to be allocated, so it also checks whether
 // copied pages are freed.
-void threetest() 
+void threetest()
 {
   uint64 phys_size = PHYSTOP - KERNBASE;
   int sz = phys_size / 4;
@@ -101,7 +101,7 @@ void threetest()
 
   wait(0);
 
-  sleep(2);
+  pause(2);
 
   for (char* q = p; q < p + sz; q += 4096) {
     if (*(int*)q != getpid()) {
@@ -125,7 +125,7 @@ char buf[4096];
 char junk3[4096];
 
 // test whether copyout() simulates COW faults.
-void filetest() 
+void filetest()
 {
   printf("file: ");
 
@@ -144,7 +144,7 @@ void filetest()
     }
 
     if (pid == 0) {
-      sleep(10);
+      pause(10);
 
       const int rad = read(fds[0], buf, sizeof(i));
       if (rad != sizeof(i)) {
@@ -152,7 +152,7 @@ void filetest()
         exit(1);
       }
 
-      sleep(10);
+      pause(10);
 
       int j = *(int*)buf;
       if (j != i) {
@@ -185,7 +185,7 @@ void filetest()
   printf("ok\n");
 }
 
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   (void)argc;
   (void)argv;
