@@ -21,6 +21,7 @@ apt-get install -y \
     binutils-riscv64-unknown-elf \
     gdb-multiarch \
     qemu-system-misc \
+    bc \
     \
     vim \
     tmux \
