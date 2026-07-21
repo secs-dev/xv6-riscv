@@ -45,8 +45,7 @@ def read_header(qemu: Qemu):
 
 
 def _read_header(prefix: list[str]):
-    s = 3
-
+    s = 2
     assert_eq(prefix[s + 0], "xv6 kernel is booting")
     assert_eq(prefix[s + 1], "")
     assert prefix[s + 2] in (f"hart {i + 1} starting" for i in range(2))
