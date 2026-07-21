@@ -1,5 +1,5 @@
-from datetime import timedelta, datetime
 from argparse import ArgumentParser
+import sys
 
 from suite.usertests import Xv6UserTestSuite
 from suite.custom import DUMPTESTS, DUMP2TESTS, ALLOCTEST, COWTEST, LAZYTESTS
@@ -35,15 +35,23 @@ parser.add_argument('suites',
 
 
 def read_header(qemu: Qemu):
-    s = 3
     prefix = [qemu.readline() for _ in range(7)]
+
+    try:
+        _read_header(prefix)
+    except Exception as e:
+        print(f"{prefix =}", sys.stderr)
+        raise e
+
+
+def _read_header(prefix: list[str]):
+    s = 3
 
     assert_eq(prefix[s + 0], "xv6 kernel is booting")
     assert_eq(prefix[s + 1], "")
     assert prefix[s + 2] in (f"hart {i + 1} starting" for i in range(2))
     assert prefix[s + 3] in (f"hart {i + 1} starting" for i in range(2))
     assert_eq(prefix[s + 4], "init: starting sh")
-
 
 if __name__ == "__main__":
     print("Starting Xv6 userspace tests...")
