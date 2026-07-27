@@ -270,12 +270,12 @@ virtio_disk_rw(struct buf *b, int write)
   // tell the device the first index in our chain of descriptors.
   disk.avail->ring[disk.avail->idx % NUM] = idx[0];
 
-  __atomic_thread_fence(__ATOMIC_SEQ_CST);
+  __sync_synchronize();
 
   // tell the device another avail ring entry is available.
   disk.avail->idx += 1; // not % NUM ...
 
-  __atomic_thread_fence(__ATOMIC_SEQ_CST);
+  __sync_synchronize();
 
   *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
 
@@ -303,13 +303,13 @@ virtio_disk_intr()
   // in the next interrupt, which is harmless.
   *R(VIRTIO_MMIO_INTERRUPT_ACK) = *R(VIRTIO_MMIO_INTERRUPT_STATUS) & 0x3;
 
-  __atomic_thread_fence(__ATOMIC_SEQ_CST);
+  __sync_synchronize();
 
   // the device increments disk.used->idx when it
   // adds an entry to the used ring.
 
   while (disk.used_idx != disk.used->idx) {
-    __atomic_thread_fence(__ATOMIC_SEQ_CST);
+    __sync_synchronize();
     int id = disk.used->ring[disk.used_idx % NUM].id;
 
     if (disk.info[id].status != 0)

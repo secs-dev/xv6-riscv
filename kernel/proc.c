@@ -512,15 +512,14 @@ forkret(void)
   // Still holding p->lock from scheduler.
   release(&p->lock);
 
-  if (first) {
+  if (__atomic_load_n(&first, __ATOMIC_ACQUIRE)) {
     // File system initialization must be run in the context of a
     // regular process (e.g., because it calls sleep), and thus cannot
     // be run from main().
     fsinit(ROOTDEV);
 
-    first = 0;
     // ensure other cores see first=0.
-    __atomic_thread_fence(__ATOMIC_SEQ_CST);
+    __atomic_store_n(&first, 0, __ATOMIC_RELEASE);
 
     // We can invoke kexec() now that file system is initialized.
     // Put the return value (argc) of kexec into a0.
