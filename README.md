@@ -22,6 +22,7 @@ graph TD
     end
 
     subgraph mp ["Многозадачность"]
+        mlfq["<a href='/doc/lab/mlfq.md'>MLFQ Планировщик</a>"]
         allocproc["<a href='/doc/lab/allocproc.md'>Аллокатор RAM для структур процессов</a>"]
         thread["<a href='/doc/lab/thread.md'>Thread</a>"]
     end
@@ -37,20 +38,21 @@ graph TD
     start --> repo
     repo --> setup_linux
     setup_linux --> vscode
-    vscode --> intro
 
     intro --> shebang
     intro --> symlink
+
+    vscode --> intro
     intro --> backtrace
     intro --> halt
 
-    intro --> filealloc
+    filealloc --> mlfq
     filealloc --> allocproc
-    filealloc --> shmem
-    filealloc --> cow
-
     shmem --> thread
 
+    intro --> filealloc
+    filealloc --> shmem
+    filealloc --> cow
     cow --> lazyalloc
     cow --> swap
 
@@ -66,9 +68,9 @@ graph TD
 
     class shebang,symlink medium
 
+    class thread,mlfq medium
+    class allocproc hard
+
     class filealloc,shmem medium
     class cow,swap,lazyalloc hard
-
-    class thread medium
-    class allocproc hard
 ```
