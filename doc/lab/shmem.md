@@ -1,0 +1,3 @@
+# Задание. Shared Memory
+
+TODO

@@ -1,0 +1,3 @@
+# Задание. Shebang
+
+TODO
