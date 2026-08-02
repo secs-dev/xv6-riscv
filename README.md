@@ -13,6 +13,11 @@ graph TD
     subgraph fs ["Файловая система"]
         shebang["<a href='/doc/lab/shebang.md' style='color:black;'>Shebang</a>"]
         symlink["<a href='/doc/lab/symlink.md' style='color:black;'>Symlink</a>"]
+        ext["<a href='/doc/lab/ext.md' style='color:black;'>EXT</a>"]
+    end
+
+    subgraph net ["Сетевое взаимодействие"]
+        nic["<a href='/doc/lab/nic.md' style='color:black;'>Драйвер NIC</a>"]
     end
 
     subgraph misc ["Прочее"]
@@ -23,16 +28,19 @@ graph TD
 
     subgraph mp ["Многозадачность"]
         mlfq["<a href='/doc/lab/mlfq.md' style='color:black;'>MLFQ Планировщик</a>"]
-        allocproc["<a href='/doc/lab/allocproc.md' style='color:black;'>Аллокатор RAM для структур процессов</a>"]
-        thread["<a href='/doc/lab/thread.md' style='color:black;'>Thread</a>"]
+        allocproc["<a href='/doc/lab/allocproc.md' style='color:black;'>Список процессов</a>"]
+        thread["<a href='/doc/lab/thread.md' style='color:black;'>Потоки</a>"]
+        alarm["<a href='/doc/lab/alarm.md' style='color:black;'>Alarm</a>"]
     end
 
     subgraph mm ["Управление RAM"]
         filealloc["<a href='/doc/lab/filealloc.md' style='color:black;'>Аллокатор RAM</a>"]
+        pteprint["<a href='/doc/lab/printpte.md' style='color:black;'>Печать таблицы страниц</a>"]
         shmem["<a href='/doc/lab/shmem.md' style='color:black;'>Shared Memory</a>"]
-        cow["<a href='/doc/lab/cow.md' style='color:black;'>Copy-on-write Fork</a>"]
+        cow["<a href='/doc/lab/cow.md' style='color:black;'>COW Fork</a>"]
         swap["<a href='/doc/lab/swap.md' style='color:black;'>Swapping</a>"]
         lazyalloc["<a href='/doc/lab/lazyalloc.md' style='color:black;'>Ленивая аллокация</a>"]
+        hugepage["<a href='/doc/lab/hugepage.md' style='color:black;'>Большие страницы</a>"]
     end
 
     start --> repo
@@ -41,6 +49,9 @@ graph TD
 
     intro --> shebang
     intro --> symlink
+    intro --> ext
+
+    intro --> nic
 
     vscode --> intro
     intro --> backtrace
@@ -49,10 +60,13 @@ graph TD
     filealloc --> mlfq
     filealloc --> allocproc
     shmem --> thread
+    cow --> alarm
 
     intro --> filealloc
-    filealloc --> shmem
-    filealloc --> cow
+    intro --> pteprint
+    pteprint --> shmem
+    pteprint --> cow
+    cow --> hugepage
     cow --> lazyalloc
     cow --> swap
 
@@ -67,10 +81,14 @@ graph TD
     class backtrace,halt easy
 
     class shebang,symlink medium
+    class ext hard
+
+    class nic hard
 
     class thread,mlfq medium
-    class allocproc hard
+    class alarm,allocproc hard
 
-    class filealloc,shmem medium
-    class cow,swap,lazyalloc hard
+    class pteprint free
+    class filealloc,cow,shmem medium
+    class swap,lazyalloc,hugepage hard
 ```
