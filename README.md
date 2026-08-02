@@ -4,12 +4,6 @@
 graph TD
     start["Начало"]
 
-    subgraph setup ["Подготовка"]
-        repo["<a href='/doc/setup/repo.md' style='color:black;'>Подготовка репозитория и порядок сдачи ЛР</a>"]
-        setup_linux["<a href='/doc/setup/linux.md' style='color:black;'>Первый запуск ОС Xv6: Linux</a>"]
-        vscode["<a href='/doc/dev/vscode.md' style='color:black;'>Настройка IDE: VSCode</a>"]
-    end
-
     subgraph fs ["Файловая система"]
         shebang["<a href='/doc/lab/shebang.md' style='color:black;'>Shebang</a>"]
         symlink["<a href='/doc/lab/symlink.md' style='color:black;'>Symlink</a>"]
@@ -20,6 +14,12 @@ graph TD
         nic["<a href='/doc/lab/nic.md' style='color:black;'>Драйвер NIC</a>"]
     end
 
+    subgraph setup ["Подготовка"]
+        repo["<a href='/doc/setup/repo.md' style='color:black;'>Подготовка репозитория и порядок сдачи ЛР</a>"]
+        setup_linux["<a href='/doc/setup/linux.md' style='color:black;'>Первый запуск ОС Xv6: Linux</a>"]
+        vscode["<a href='/doc/dev/vscode.md' style='color:black;'>Настройка IDE: VSCode</a>"]
+    end
+
     subgraph misc ["Прочее"]
         intro["<a href='/doc/lab/intro.md' style='color:black;'>Введение в Xv6</a>"]
         backtrace["<a href='/doc/lab/backtrace.md' style='color:black;'>Backtrace</a>"]
@@ -27,8 +27,8 @@ graph TD
     end
 
     subgraph mp ["Многозадачность"]
-        mlfq["<a href='/doc/lab/mlfq.md' style='color:black;'>MLFQ Планировщик</a>"]
         allocproc["<a href='/doc/lab/allocproc.md' style='color:black;'>Список процессов</a>"]
+        mlfq["<a href='/doc/lab/mlfq.md' style='color:black;'>MLFQ Планировщик</a>"]
         thread["<a href='/doc/lab/thread.md' style='color:black;'>Потоки</a>"]
         alarm["<a href='/doc/lab/alarm.md' style='color:black;'>Alarm</a>"]
     end
@@ -47,11 +47,11 @@ graph TD
     repo --> setup_linux
     setup_linux --> vscode
 
+    cow --> nic
+
     intro --> shebang
     intro --> symlink
     intro --> ext
-
-    intro --> nic
 
     vscode --> intro
     intro --> backtrace
@@ -69,6 +69,15 @@ graph TD
     cow --> hugepage
     cow --> lazyalloc
     cow --> swap
+
+    %% invisible edges to force layout: FS above RAM, NIC left of RAM, mp below RAM
+    ext ~~~ filealloc
+    ext ~~~ pteprint
+    nic ~~~ cow
+    swap ~~~ mlfq
+    swap ~~~ allocproc
+    hugepage ~~~ thread
+    hugepage ~~~ alarm
 
     classDef free fill:#eceff1,stroke:#607d8b,stroke-width:2px,color:#37474f
     classDef easy fill:#c8e6c9,stroke:#388e3c,stroke-width:2px,color:#1b5e20
