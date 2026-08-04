@@ -58,6 +58,7 @@ graph TD
     vscode --> intro
     intro --> backtrace
     intro --> halt
+    backtrace --> flamegraph
 
     filealloc --> mlfq
     filealloc --> allocproc
@@ -90,6 +91,7 @@ graph TD
 
     class intro free
     class backtrace,halt easy
+    class flamegraph medium
 
     class shebang,symlink medium
     class ext hard
