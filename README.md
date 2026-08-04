@@ -24,6 +24,7 @@ graph TD
         intro["<a href='/doc/lab/intro.md' style='color:black;'>Введение в Xv6</a>"]
         backtrace["<a href='/doc/lab/backtrace.md' style='color:black;'>Backtrace</a>"]
         halt["<a href='/doc/lab/halt.md' style='color:black;'>Halt</a>"]
+        flamegraph["<a href='/doc/lab/flamegraph.md' style='color:black;'>FlameGraph</a>"]
     end
 
     subgraph mp ["Многозадачность"]
