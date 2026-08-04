@@ -41,6 +41,7 @@ graph TD
         swap["<a href='/doc/lab/swap.md' style='color:black;'>Swapping</a>"]
         lazyalloc["<a href='/doc/lab/lazyalloc.md' style='color:black;'>Ленивая аллокация</a>"]
         hugepage["<a href='/doc/lab/hugepage.md' style='color:black;'>Большие страницы</a>"]
+        aslr["<a href='/doc/lab/aslr.md' style='color:black;'>ASLR</a>"]
     end
 
     start --> repo
@@ -64,13 +65,13 @@ graph TD
 
     intro --> filealloc
     intro --> pteprint
+    pteprint --> aslr
     pteprint --> shmem
     pteprint --> cow
     cow --> hugepage
     cow --> lazyalloc
     cow --> swap
 
-    %% invisible edges to force layout: FS above RAM, NIC left of RAM, mp below RAM
     ext ~~~ filealloc
     ext ~~~ pteprint
     nic ~~~ cow
@@ -99,5 +100,5 @@ graph TD
 
     class pteprint free
     class filealloc,cow,shmem medium
-    class swap,lazyalloc,hugepage hard
+    class aslr,swap,lazyalloc,hugepage hard
 ```
