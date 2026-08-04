@@ -1,3 +1,3 @@
 # Задание. Swapping
 
-TODO
+Реализуйте swapping.
