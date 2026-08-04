@@ -26,8 +26,8 @@
 #define VIRTIO0_IRQ 1
 
 // core-local interrupt controller (CLINT)
-#define CLINT_BASE           0x02000000L
-#define CLINT(hart)          (CLINT_BASE + (hart) * 4)
+#define CLINT_BASE  0x02000000L
+#define CLINT(hart) (CLINT_BASE + (hart) * 4)
 
 // qemu puts platform-level interrupt controller (PLIC) here.
 #define PLIC                 0x0c000000L

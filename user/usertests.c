@@ -2804,7 +2804,7 @@ partial_write(char *s)
 
   p[-1] = 'X';
 
-  cc = write(fd, p-1, 2);
+  cc = write(fd, p - 1, 2);
   if (cc != -1) {
     printf("%s: write succeeded, should have failed\n", s);
     exit(1);
