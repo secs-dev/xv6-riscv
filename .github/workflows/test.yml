@@ -1,0 +1,13 @@
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - run: sudo apt-get update && sudo apt-get install -y gcc-riscv64-linux-gnu qemu-system-misc clang-format
+      - run: make fmt && git diff --exit-code
+      - run: make kernel/kernel fs.img
+      - run: ./test-xv6.py usertests
+      - run: ./test-xv6.py crash
