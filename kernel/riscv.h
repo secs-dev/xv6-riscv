@@ -367,6 +367,13 @@ sfence_vma()
   asm volatile("sfence.vma zero, zero");
 }
 
+// fence for memory-mapped IO
+static inline void
+io_fence()
+{
+  asm volatile("fence iorw, iorw" ::: "memory");
+}
+
 typedef uint64 pte_t;
 typedef uint64 *pagetable_t; // 512 PTEs
 
