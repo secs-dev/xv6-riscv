@@ -163,7 +163,6 @@ freeproc(struct proc *p)
   p->pagetable = 0;
   p->sz = 0;
   p->pid = 0;
-  p->parent = 0;
   p->name[0] = 0;
   p->chan = 0;
   p->killed = 0;
@@ -394,6 +393,7 @@ kwait(uint64 addr)
             release(&wait_lock);
             return -1;
           }
+          pp->parent = 0;
           freeproc(pp);
           release(&pp->lock);
           release(&wait_lock);
