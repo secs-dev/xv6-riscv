@@ -102,6 +102,7 @@ bread(uint dev, uint blockno)
 }
 
 // Write b's contents to disk.  Must be locked.
+// Only the log calls bwrite.
 void
 bwrite(struct buf *b)
 {

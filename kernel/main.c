@@ -29,12 +29,12 @@ main()
     fileinit();         // file table
     virtio_disk_init(); // emulated hard disk
     userinit();         // first user process
-    __atomic_thread_fence(__ATOMIC_SEQ_CST);
-    started = 1;
+
+    __atomic_store_n(&started, 1, __ATOMIC_RELEASE);
   } else {
-    while (started == 0)
+    while (__atomic_load_n(&started, __ATOMIC_ACQUIRE) == 0)
       ;
-    __atomic_thread_fence(__ATOMIC_SEQ_CST);
+
     printk("hart %d starting\n", cpuid());
     kvminithart();  // turn on paging
     trapinithart(); // install kernel trap vector

@@ -2393,7 +2393,7 @@ fsfull()
     nfiles--;
   }
 
-  printf("fsfull test finished\n");
+  printf("fsfull test finished, %d blocks\n", fsblocks);
 }
 
 void
@@ -2763,6 +2763,111 @@ lazy_sbrk(char *s)
   exit(0);
 }
 
+void
+partial_write(char *s)
+{
+  // Create testfile containing "A".
+  // write() 2 bytes that span page boundary: first is "X", second is unmapped.
+  // Potential problem: write errors, forgets to log the updated first byte.
+  // read() from file returns "X".
+  // Flush buffer cache with some large writes.
+  // read() from file should still return "X" (but might return "A" due to bug).
+
+  unlink("testfile");
+  int fd = open("testfile", O_CREATE | O_RDWR);
+  if (fd < 0) {
+    printf("%s: cannot create testfile\n", s);
+    exit(1);
+  }
+
+  int cc = write(fd, "A", 1);
+  if (cc != 1) {
+    printf("%s: could not write A\n", s);
+    exit(1);
+  }
+
+  close(fd);
+  fd = open("testfile", O_RDWR);
+  if (fd < 0) {
+    printf("%s: cannot re-open testfile\n", s);
+    exit(1);
+  }
+
+  char *p = sbrk(0);
+  sbrk(PGSIZE - ((uint64)p % PGSIZE));
+
+  p = sbrk(0);
+  if ((uint64)p % PGSIZE != 0) {
+    printf("%s: sbrk did not align\n", s);
+    exit(1);
+  }
+
+  p[-1] = 'X';
+
+  cc = write(fd, p - 1, 2);
+  if (cc != -1) {
+    printf("%s: write succeeded, should have failed\n", s);
+    exit(1);
+  }
+
+  close(fd);
+
+  fd = open("testfile", O_RDONLY);
+  if (fd < 0) {
+    printf("%s: cannot re-open testfile\n", s);
+    exit(1);
+  }
+
+  char b;
+  cc = read(fd, &b, 1);
+  if (cc != 1) {
+    printf("%s: cannot read testfile\n", s);
+    exit(1);
+  }
+
+  close(fd);
+
+  if (b != 'X') {
+    printf("%s: read returned %c, expected X\n", s, b);
+    exit(1);
+  }
+
+  fd = open("bigfile", O_CREATE | O_RDWR);
+  for (int i = 0; i < 64; i++) {
+    char buf[1024];
+    memset(buf, 0, sizeof(buf));
+    cc = write(fd, buf, sizeof(buf));
+    if (cc != sizeof(buf)) {
+      printf("%s: could not write to bigfile\n", s);
+      exit(-1);
+    }
+  }
+  close(fd);
+
+  unlink("bigfile");
+
+  fd = open("testfile", O_RDONLY);
+  if (fd < 0) {
+    printf("%s: cannot re-open testfile\n", s);
+    exit(1);
+  }
+
+  cc = read(fd, &b, 1);
+  if (cc != 1) {
+    printf("%s: cannot read testfile\n", s);
+    exit(1);
+  }
+
+  close(fd);
+
+  if (b != 'X') {
+    printf("%s: read returned %c, expected X\n", s, b);
+    exit(1);
+  }
+
+  unlink("testfile");
+}
+
 struct test {
   void (*f)(char *);
   char *s;
@@ -2831,6 +2936,7 @@ struct test {
   {lazy_unmap, "lazy_unmap"},
   {lazy_copy, "lazy_copy"},
   {lazy_sbrk, "lazy_sbrk"},
+  {partial_write, "partial_write"},
   {0, 0},
 };
 
