@@ -364,7 +364,7 @@ static inline void
 sfence_vma()
 {
   // the zero, zero means flush all TLB entries.
-  asm volatile("sfence.vma zero, zero");
+  asm volatile("sfence.vma zero, zero" ::: "memory");
 }
 
 // fence for memory-mapped IO
@@ -372,6 +372,13 @@ static inline void
 io_fence()
 {
   asm volatile("fence iorw, iorw" ::: "memory");
+}
+
+// fence for icache
+static inline void
+icache_fence()
+{
+  asm volatile("fence.i" ::: "memory");
 }
 
 typedef uint64 pte_t;
