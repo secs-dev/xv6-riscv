@@ -86,6 +86,7 @@ virtio_disk_init(void)
   uint64 features = *R(VIRTIO_MMIO_DEVICE_FEATURES);
   features &= ~(1 << VIRTIO_BLK_F_RO);
   features &= ~(1 << VIRTIO_BLK_F_SCSI);
+  features &= ~(1 << VIRTIO_BLK_F_FLUSH);
   features &= ~(1 << VIRTIO_BLK_F_CONFIG_WCE);
   features &= ~(1 << VIRTIO_BLK_F_MQ);
   features &= ~(1 << VIRTIO_F_ANY_LAYOUT);
