@@ -342,7 +342,7 @@ uvmclear(pagetable_t pagetable, uint64 va)
 // Copy len bytes from src to virtual address dstva in a given page table.
 // Return 0 on success, -1 on error.
 int
-copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
+copyout(pagetable_t pagetable, uint64 psz, uint64 dstva, char *src, uint64 len)
 {
   uint64 n, va0, pa0;
   pte_t *pte;
@@ -354,7 +354,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 
     pa0 = walkaddr(pagetable, va0);
     if (pa0 == 0) {
-      if ((pa0 = vmfault(pagetable, va0, 0)) == 0) {
+      if ((pa0 = vmfault(pagetable, psz, va0, 0)) == 0) {
         return -1;
       }
     }
@@ -380,7 +380,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 // Copy len bytes to dst from virtual address srcva in a given page table.
 // Return 0 on success, -1 on error.
 int
-copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
+copyin(pagetable_t pagetable, uint64 psz, char *dst, uint64 srcva, uint64 len)
 {
   uint64 n, va0, pa0;
 
@@ -388,7 +388,7 @@ copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
     va0 = PGROUNDDOWN(srcva);
     pa0 = walkaddr(pagetable, va0);
     if (pa0 == 0) {
-      if ((pa0 = vmfault(pagetable, va0, 1)) == 0) {
+      if ((pa0 = vmfault(pagetable, psz, va0, 1)) == 0) {
         return -1;
       }
     }
@@ -409,7 +409,8 @@ copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
 // until a '\0', or max.
 // Return 0 on success, -1 on error.
 int
-copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
+copyinstr(pagetable_t pagetable, uint64 psz, char *dst, uint64 srcva,
+          uint64 max)
 {
   uint64 n, va0, pa0;
   int got_null = 0;
@@ -418,7 +419,7 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     va0 = PGROUNDDOWN(srcva);
     pa0 = walkaddr(pagetable, va0);
     if (pa0 == 0) {
-      if ((pa0 = vmfault(pagetable, va0, 1)) == 0) {
+      if ((pa0 = vmfault(pagetable, psz, va0, 1)) == 0) {
         return -1;
       }
     }
@@ -455,12 +456,11 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 // returns 0 if va is invalid or already mapped, or if
 // out of physical memory, and physical address if successful.
 uint64
-vmfault(pagetable_t pagetable, uint64 va, int read)
+vmfault(pagetable_t pagetable, uint64 psz, uint64 va, int read)
 {
   uint64 mem;
-  struct proc *p = myproc();
 
-  if (va >= p->sz)
+  if (va >= psz)
     return 0;
   va = PGROUNDDOWN(va);
   if (ismapped(pagetable, va)) {
@@ -470,7 +470,7 @@ vmfault(pagetable_t pagetable, uint64 va, int read)
   if (mem == 0)
     return 0;
   memset((void *)mem, 0, PGSIZE);
-  if (mappages(p->pagetable, va, PGSIZE, mem, PTE_W | PTE_U | PTE_R) != 0) {
+  if (mappages(pagetable, va, PGSIZE, mem, PTE_W | PTE_U | PTE_R) != 0) {
     kfree((void *)mem);
     return 0;
   }
