@@ -69,6 +69,8 @@ uartinit(void)
 
   // enable transmit and receive interrupts.
   WriteReg(IER, IER_TX_ENABLE | IER_RX_ENABLE);
+
+  initsleeplock(&tx_lock, "uart");
 }
 
 // transmit buf[] to the uart. it blocks if the
