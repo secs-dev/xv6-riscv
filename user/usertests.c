@@ -2714,6 +2714,41 @@ lazy_copy(char *s)
 }
 
 void
+lazy_copyinstr(char *s)
+{
+  char *p = sbrk(0);
+  sbrk(PGSIZE - ((uint64)p % PGSIZE));
+
+  p = sbrk(0);
+  if ((uint64)p % PGSIZE != 0) {
+    printf("%s: sbrk did not align\n", s);
+    exit(1);
+  }
+
+  sbrklazy(2 * PGSIZE);
+  p[4095] = '/';
+  int fd = open(&p[4095], O_RDONLY);
+  if (fd < 0) {
+    printf("could not open /");
+    exit(1);
+  }
+
+  struct stat st;
+  int r = fstat(fd, &st);
+  if (r < 0) {
+    printf("could not stat /");
+    exit(1);
+  }
+
+  if (st.type != T_DIR) {
+    printf("/ is not T_DIR");
+    exit(1);
+  }
+
+  close(fd);
+}
+
+void
 lazy_sbrk(char *s)
 {
   // sbrk() takes just int, so take 2^30-sized steps towards MAXVA
@@ -2935,6 +2970,7 @@ struct test {
   {lazy_alloc, "lazy_alloc"},
   {lazy_unmap, "lazy_unmap"},
   {lazy_copy, "lazy_copy"},
+  {lazy_copyinstr, "lazy_copyinstr"},
   {lazy_sbrk, "lazy_sbrk"},
   {partial_write, "partial_write"},
   {0, 0},
