@@ -2903,6 +2903,37 @@ partial_write(char *s)
   unlink("testfile");
 }
 
+void
+unlinkcwd(char *s)
+{
+  if (mkdir("/a") < 0) {
+    printf("%s: mkdir /a failed\n", s);
+    exit(1);
+  }
+  if (mkdir("/a/b") < 0) {
+    printf("%s: mkdir /a/b failed\n", s);
+    exit(1);
+  }
+  if (chdir("/a/b") < 0) {
+    printf("%s: chdir failed\n", s);
+    exit(1);
+  }
+  if (unlink("/a/b") < 0) {
+    printf("%s: unlink /a/b failed\n", s);
+    exit(1);
+  }
+  if (unlink("/a") < 0) {
+    printf("%s: unlink /a failed\n", s);
+    exit(1);
+  }
+  if (open("../", O_RDONLY) > 0) {
+    printf("%s: open ../ non-existing directory\n", s);
+  }
+  if (open("../c", O_CREATE) > 0) {
+    printf("%s: create ../c non-existing file\n", s);
+  }
+}
+
 struct test {
   void (*f)(char *);
   char *s;
@@ -2973,6 +3004,7 @@ struct test {
   {lazy_copyinstr, "lazy_copyinstr"},
   {lazy_sbrk, "lazy_sbrk"},
   {partial_write, "partial_write"},
+  {unlinkcwd, "unlinkcwd"},
   {0, 0},
 };
 

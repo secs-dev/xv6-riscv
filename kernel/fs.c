@@ -690,6 +690,10 @@ namex(char *path, int nameiparent, char *name)
       iunlockput(ip);
       return 0;
     }
+    if (ip->nlink == 0) {
+      iunlockput(ip);
+      return 0;
+    } 
     if (nameiparent && *path == '\0') {
       // Stop one level early.
       iunlock(ip);
