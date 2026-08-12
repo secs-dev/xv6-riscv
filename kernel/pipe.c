@@ -93,8 +93,11 @@ pipewrite(struct pipe *pi, uint64 addr, int n)
       acquire(&pi->lock);
     } else {
       char ch;
-      if (copyin(pr->pagetable, pr->sz, &ch, addr + i, 1) == -1)
+      if (copyin(pr->pagetable, pr->sz, &ch, addr + i, 1) == -1) {
+        if (i == 0)
+          i = -1;
         break;
+      }
       pi->data[pi->nwrite++ % PIPESIZE] = ch;
       i++;
     }
