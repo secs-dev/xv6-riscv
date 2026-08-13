@@ -95,7 +95,7 @@ void            procinit(void);
 void            scheduler(void) __attribute__((noreturn));
 void            sched(void);
 void            sleep_prepare(void*);
-void            sleep();
+void            sleep(void);
 void            userinit(void);
 int             kwait(uint64);
 void            wakeup(void*);
