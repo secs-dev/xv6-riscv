@@ -254,9 +254,9 @@ create(char *path, short type, short major, short minor)
   ilock(dp);
 
   if (dp->nlink == 0) {
-      iunlockput(dp);
-      return 0;
-  } 
+    iunlockput(dp);
+    return 0;
+  }
 
   if ((ip = dirlookup(dp, name, 0)) != 0) {
     iunlockput(dp);
