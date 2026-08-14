@@ -452,6 +452,9 @@ scheduler(void)
         c->proc = p;
         swtch(&c->context, &p->context);
 
+        // Don't re-enable interrupts on release.
+        mycpu()->intena = 0;
+
         // Process is done running for now.
         // It should have changed its p->state before coming back.
         c->proc = 0;
