@@ -155,6 +155,13 @@ sys_link(void)
   if ((dp = nameiparent(new, name)) == 0)
     goto bad;
   ilock(dp);
+  // dp may have been unlinked while we resolved it; linking into an
+  // orphaned directory leaks ip (itrunc discards the record without
+  // dropping ip->nlink).  create() has the same guard.
+  if (dp->nlink == 0) {
+    iunlockput(dp);
+    goto bad;
+  }
   if (dp->dev != ip->dev || dirlink(dp, name, ip->inum) < 0) {
     iunlockput(dp);
     goto bad;
