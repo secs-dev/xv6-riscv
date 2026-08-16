@@ -328,6 +328,17 @@ iunlock(struct inode *ip)
   releasesleep(&ip->lock);
 }
 
+// Mark the on-disk inode free.
+static void
+ifree(uint dev, uint inum)
+{
+  struct buf *bp = bread(dev, IBLOCK(inum, sb));
+  struct dinode *dip = (struct dinode*)bp->data + inum % IPB;
+  dip->type = 0;
+  log_write(bp);
+  brelse(bp);
+}
+
 // Drop a reference to an in-memory inode.
 // If that was the last reference, the inode table entry can
 // be recycled.
@@ -340,18 +351,18 @@ iput(struct inode *ip)
 {
   acquire(&itable.lock);
 
-  if (ip->ref == 1 && ip->valid && ip->nlink == 0) {
-    // inode has no links and no other references: truncate and free.
+  // Last reference of an unlinked inode?  Capture dev/inum before ref--,
+  // since once ref hits 0, ip may be recycled by a concurrent iget()
+  // for a different inum.
+  int last = (ip->ref == 1 && ip->valid && ip->nlink == 0);
+  uint dev = ip->dev, inum = ip->inum;
 
-    // ip->ref == 1 means no other process can have ip locked,
-    // so this acquiresleep() won't block (or deadlock).
+  if(last){
+    // ip->ref == 1 means no other process can have ip locked.
     acquiresleep(&ip->lock);
-
     release(&itable.lock);
 
-    itrunc(ip);
-    ip->type = 0;
-    iupdate(ip);
+    itrunc(ip);            // free the data blocks (type stays nonzero on disk)
     ip->valid = 0;
 
     releasesleep(&ip->lock);
@@ -361,6 +372,9 @@ iput(struct inode *ip)
 
   ip->ref--;
   release(&itable.lock);
+
+  if(last)
+    ifree(dev, inum);      // now clear type on disk: inum becomes allocatable
 }
 
 // Common idiom: unlock, then put.
