@@ -333,7 +333,7 @@ static void
 ifree(uint dev, uint inum)
 {
   struct buf *bp = bread(dev, IBLOCK(inum, sb));
-  struct dinode *dip = (struct dinode*)bp->data + inum % IPB;
+  struct dinode *dip = (struct dinode *)bp->data + inum % IPB;
   dip->type = 0;
   log_write(bp);
   brelse(bp);
@@ -357,12 +357,12 @@ iput(struct inode *ip)
   int last = (ip->ref == 1 && ip->valid && ip->nlink == 0);
   uint dev = ip->dev, inum = ip->inum;
 
-  if(last){
+  if (last) {
     // ip->ref == 1 means no other process can have ip locked.
     acquiresleep(&ip->lock);
     release(&itable.lock);
 
-    itrunc(ip);            // free the data blocks (type stays nonzero on disk)
+    itrunc(ip); // free the data blocks (type stays nonzero on disk)
     ip->valid = 0;
 
     releasesleep(&ip->lock);
@@ -373,8 +373,8 @@ iput(struct inode *ip)
   ip->ref--;
   release(&itable.lock);
 
-  if(last)
-    ifree(dev, inum);      // now clear type on disk: inum becomes allocatable
+  if (last)
+    ifree(dev, inum); // now clear type on disk: inum becomes allocatable
 }
 
 // Common idiom: unlock, then put.
