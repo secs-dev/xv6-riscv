@@ -58,6 +58,7 @@ release(struct spinlock *lk)
   //
   // On RISC-V, __atomic_store_n turns into a single atomic store:
   //   s1 = &lk->locked
+  //   fence rw,w
   //   sw zero,0(s1)
   //
   // The __ATOMIC_RELEASE argument to __atomic_store_n tells the
