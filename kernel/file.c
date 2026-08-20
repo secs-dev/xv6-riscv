@@ -108,7 +108,7 @@ fileread(struct file *f, uint64 addr, int n)
 {
   int r = 0;
 
-  if (f->readable == 0)
+  if (f->readable == 0 || n < 0)
     return -1;
 
   if (f->type == FD_PIPE) {
@@ -136,7 +136,7 @@ filewrite(struct file *f, uint64 addr, int n)
 {
   int r, ret = 0;
 
-  if (f->writable == 0)
+  if (f->writable == 0 || n < 0)
     return -1;
 
   if (f->type == FD_PIPE) {
