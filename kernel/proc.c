@@ -676,12 +676,12 @@ procdump(void)
 {
   static char *states[] = {
     // clang-format off
-    [UNUSED]    "unused",
-    [USED]      "used",
-    [SLEEPING]  "sleep ",
-    [RUNNABLE]  "runble",
-    [RUNNING]   "run   ",
-    [ZOMBIE]    "zombie"
+    [UNUSED]    = "unused",
+    [USED]      = "used",
+    [SLEEPING]  = "sleep ",
+    [RUNNABLE]  = "runble",
+    [RUNNING]   = "run   ",
+    [ZOMBIE]    = "zombie"
     // clang-format on
   };
   struct proc *p;
