@@ -3293,6 +3293,76 @@ outofinodes(char *s)
   }
 }
 
+void
+linkoverflow(char *s)
+{
+  enum { TARGET = 32768 };
+  enum { DIRS = 64 };
+  struct stat st;
+  int i;
+
+  unlink("/lof");
+  int fd = open("/lof", O_CREATE | O_RDWR);
+  if (fd < 0) {
+    printf("%s: cannot create /lof\n", s);
+    exit(1);
+  }
+  close(fd);
+
+  for (i = 0; i < TARGET; i++) {
+    int d = i % DIRS;
+    int f = i / DIRS;
+
+    char pn[16];
+    pn[0] = '/';
+    pn[1] = 'd';
+    pn[2] = '_';
+    pn[3] = 'a' + (d / 16);
+    pn[4] = 'a' + (d % 16);
+    pn[5] = '\0';
+    if (f == 0 && mkdir(pn) < 0) {
+      printf("%s: mkdir(%s) failed\n", s, pn);
+      exit(1);
+    }
+
+    pn[5] = '/';
+    pn[6] = 'l';
+    pn[7] = 'a' + (f / 256);
+    pn[8] = 'a' + ((f / 16) % 16);
+    pn[9] = 'a' + (f % 16);
+    pn[10] = '\0';
+
+    if (link("/lof", pn) < 0) {
+      if (stat("/lof", &st) < 0) {
+        printf("%s: stat(/lof) failed\n", s);
+        exit(1);
+      }
+      if (st.nlink >= 32767) {
+        // overflow check succeeded.
+        break;
+      }
+      printf("%s: link failed after %d links (nlink=%d)\n", s, i, st.nlink);
+      exit(1);
+    }
+
+    if (i % 100 == 0) {
+      printf("%s: i=%d, pn=%s\n", s, i, pn);
+    }
+  }
+
+  if (stat("/lof", &st) < 0) {
+    printf("%s: stat(/lof) failed\n", s);
+    exit(1);
+  }
+
+  unlink("/lof");
+
+  if (st.nlink < 0) {
+    printf("%s: negative link count: %d\n", s, st.nlink);
+    exit(1);
+  }
+}
+
 struct test slowtests[] = {
   {bigdir, "bigdir"},
   {manywrites, "manywrites"},
@@ -3300,6 +3370,7 @@ struct test slowtests[] = {
   {execout, "execout"},
   {diskfull, "diskfull"},
   {outofinodes, "outofinodes"},
+  // {linkoverflow, "linkoverflow"},
 
   {0, 0},
 };
