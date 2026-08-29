@@ -26,6 +26,7 @@ struct superblock {
 #define NDIRECT   12
 #define NINDIRECT (BSIZE / sizeof(uint))
 #define MAXFILE   (NDIRECT + NINDIRECT)
+#define NLINK_MAX 32767 // nlink is a short; refuse links past its maximum
 
 // On-disk inode structure
 struct dinode {

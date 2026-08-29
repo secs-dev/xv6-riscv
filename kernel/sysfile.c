@@ -142,6 +142,12 @@ sys_link(void)
     return -1;
   }
 
+  if (ip->nlink >= NLINK_MAX) {
+    iunlockput(ip);
+    end_op();
+    return -1;
+  }
+
   ip->nlink++;
   iupdate(ip);
   iunlock(ip);
@@ -149,6 +155,13 @@ sys_link(void)
   if ((dp = nameiparent(new, name)) == 0)
     goto bad;
   ilock(dp);
+  // dp may have been unlinked while we resolved it; linking into an
+  // orphaned directory leaks ip (itrunc discards the record without
+  // dropping ip->nlink).  create() has the same guard.
+  if (dp->nlink == 0) {
+    iunlockput(dp);
+    goto bad;
+  }
   if (dp->dev != ip->dev || dirlink(dp, name, ip->inum) < 0) {
     iunlockput(dp);
     goto bad;
@@ -252,6 +265,17 @@ create(char *path, short type, short major, short minor)
     return 0;
 
   ilock(dp);
+
+  if (dp->nlink == 0) {
+    iunlockput(dp);
+    return 0;
+  }
+
+  // a new directory's ".." would push dp->nlink past its maximum
+  if (type == T_DIR && dp->nlink >= NLINK_MAX) {
+    iunlockput(dp);
+    return 0;
+  }
 
   if ((ip = dirlookup(dp, name, 0)) != 0) {
     iunlockput(dp);
@@ -493,9 +517,9 @@ sys_pipe(void)
     fileclose(wf);
     return -1;
   }
-  if (copyout(p->pagetable, fdarray, (char *)&fd0, sizeof(fd0)) < 0 ||
-      copyout(p->pagetable, fdarray + sizeof(fd0), (char *)&fd1, sizeof(fd1)) <
-        0) {
+  if (copyout(p->pagetable, p->sz, fdarray, (char *)&fd0, sizeof(fd0)) < 0 ||
+      copyout(p->pagetable, p->sz, fdarray + sizeof(fd0), (char *)&fd1,
+              sizeof(fd1)) < 0) {
     p->ofile[fd0] = 0;
     p->ofile[fd1] = 0;
     fileclose(rf);

@@ -86,6 +86,7 @@ virtio_disk_init(void)
   uint64 features = *R(VIRTIO_MMIO_DEVICE_FEATURES);
   features &= ~(1 << VIRTIO_BLK_F_RO);
   features &= ~(1 << VIRTIO_BLK_F_SCSI);
+  features &= ~(1 << VIRTIO_BLK_F_FLUSH);
   features &= ~(1 << VIRTIO_BLK_F_CONFIG_WCE);
   features &= ~(1 << VIRTIO_BLK_F_MQ);
   features &= ~(1 << VIRTIO_F_ANY_LAYOUT);
@@ -228,7 +229,10 @@ virtio_disk_rw(struct buf *b, int write)
     if (alloc3_desc(idx) == 0) {
       break;
     }
-    sleep(&disk.free[0], &disk.vdisk_lock);
+    sleep_prepare(&disk.free[0]);
+    release(&disk.vdisk_lock);
+    sleep();
+    acquire(&disk.vdisk_lock);
   }
 
   // format the three descriptors.
@@ -281,7 +285,10 @@ virtio_disk_rw(struct buf *b, int write)
 
   // Wait for virtio_disk_intr() to say request has finished.
   while (b->disk == 1) {
-    sleep(b, &disk.vdisk_lock);
+    sleep_prepare(b);
+    release(&disk.vdisk_lock);
+    sleep();
+    acquire(&disk.vdisk_lock);
   }
 
   disk.info[idx[0]].b = 0;

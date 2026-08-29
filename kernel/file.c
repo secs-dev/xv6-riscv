@@ -94,7 +94,7 @@ filestat(struct file *f, uint64 addr)
     ilock(f->ip);
     stati(f->ip, &st);
     iunlock(f->ip);
-    if (copyout(p->pagetable, addr, (char *)&st, sizeof(st)) < 0)
+    if (copyout(p->pagetable, p->sz, addr, (char *)&st, sizeof(st)) < 0)
       return -1;
     return 0;
   }
@@ -108,7 +108,7 @@ fileread(struct file *f, uint64 addr, int n)
 {
   int r = 0;
 
-  if (f->readable == 0)
+  if (f->readable == 0 || n < 0)
     return -1;
 
   if (f->type == FD_PIPE) {
@@ -136,7 +136,7 @@ filewrite(struct file *f, uint64 addr, int n)
 {
   int r, ret = 0;
 
-  if (f->writable == 0)
+  if (f->writable == 0 || n < 0)
     return -1;
 
   if (f->type == FD_PIPE) {

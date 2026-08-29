@@ -99,13 +99,11 @@ kexec(char *path, char **argv)
   // Copy argument strings into new stack, remember their
   // addresses in ustack[].
   for (argc = 0; argv[argc]; argc++) {
-    if (argc >= MAXARG)
-      goto bad;
     sp -= strlen(argv[argc]) + 1;
     sp -= sp % 16; // riscv sp must be 16-byte aligned
     if (sp < stackbase)
       goto bad;
-    if (copyout(pagetable, sp, argv[argc], strlen(argv[argc]) + 1) < 0)
+    if (copyout(pagetable, sz, sp, argv[argc], strlen(argv[argc]) + 1) < 0)
       goto bad;
     ustack[argc] = sp;
   }
@@ -116,7 +114,8 @@ kexec(char *path, char **argv)
   sp -= sp % 16;
   if (sp < stackbase)
     goto bad;
-  if (copyout(pagetable, sp, (char *)ustack, (argc + 1) * sizeof(uint64)) < 0)
+  if (copyout(pagetable, sz, sp, (char *)ustack, (argc + 1) * sizeof(uint64)) <
+      0)
     goto bad;
 
   // a0 and a1 contain arguments to user main(argc, argv)

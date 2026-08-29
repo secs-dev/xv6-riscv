@@ -2714,6 +2714,41 @@ lazy_copy(char *s)
 }
 
 void
+lazy_copyinstr(char *s)
+{
+  char *p = sbrk(0);
+  sbrk(PGSIZE - ((uint64)p % PGSIZE));
+
+  p = sbrk(0);
+  if ((uint64)p % PGSIZE != 0) {
+    printf("%s: sbrk did not align\n", s);
+    exit(1);
+  }
+
+  sbrklazy(2 * PGSIZE);
+  p[4095] = '/';
+  int fd = open(&p[4095], O_RDONLY);
+  if (fd < 0) {
+    printf("could not open /");
+    exit(1);
+  }
+
+  struct stat st;
+  int r = fstat(fd, &st);
+  if (r < 0) {
+    printf("could not stat /");
+    exit(1);
+  }
+
+  if (st.type != T_DIR) {
+    printf("/ is not T_DIR");
+    exit(1);
+  }
+
+  close(fd);
+}
+
+void
 lazy_sbrk(char *s)
 {
   // sbrk() takes just int, so take 2^30-sized steps towards MAXVA
@@ -2868,6 +2903,37 @@ partial_write(char *s)
   unlink("testfile");
 }
 
+void
+unlinkcwd(char *s)
+{
+  if (mkdir("/a") < 0) {
+    printf("%s: mkdir /a failed\n", s);
+    exit(1);
+  }
+  if (mkdir("/a/b") < 0) {
+    printf("%s: mkdir /a/b failed\n", s);
+    exit(1);
+  }
+  if (chdir("/a/b") < 0) {
+    printf("%s: chdir failed\n", s);
+    exit(1);
+  }
+  if (unlink("/a/b") < 0) {
+    printf("%s: unlink /a/b failed\n", s);
+    exit(1);
+  }
+  if (unlink("/a") < 0) {
+    printf("%s: unlink /a failed\n", s);
+    exit(1);
+  }
+  if (open("../", O_RDONLY) > 0) {
+    printf("%s: open ../ non-existing directory\n", s);
+  }
+  if (open("../c", O_CREATE) > 0) {
+    printf("%s: create ../c non-existing file\n", s);
+  }
+}
+
 struct test {
   void (*f)(char *);
   char *s;
@@ -2935,8 +3001,10 @@ struct test {
   {lazy_alloc, "lazy_alloc"},
   {lazy_unmap, "lazy_unmap"},
   {lazy_copy, "lazy_copy"},
+  {lazy_copyinstr, "lazy_copyinstr"},
   {lazy_sbrk, "lazy_sbrk"},
   {partial_write, "partial_write"},
+  {unlinkcwd, "unlinkcwd"},
   {0, 0},
 };
 
@@ -3225,6 +3293,76 @@ outofinodes(char *s)
   }
 }
 
+void
+linkoverflow(char *s)
+{
+  enum { TARGET = 32768 };
+  enum { DIRS = 64 };
+  struct stat st;
+  int i;
+
+  unlink("/lof");
+  int fd = open("/lof", O_CREATE | O_RDWR);
+  if (fd < 0) {
+    printf("%s: cannot create /lof\n", s);
+    exit(1);
+  }
+  close(fd);
+
+  for (i = 0; i < TARGET; i++) {
+    int d = i % DIRS;
+    int f = i / DIRS;
+
+    char pn[16];
+    pn[0] = '/';
+    pn[1] = 'd';
+    pn[2] = '_';
+    pn[3] = 'a' + (d / 16);
+    pn[4] = 'a' + (d % 16);
+    pn[5] = '\0';
+    if (f == 0 && mkdir(pn) < 0) {
+      printf("%s: mkdir(%s) failed\n", s, pn);
+      exit(1);
+    }
+
+    pn[5] = '/';
+    pn[6] = 'l';
+    pn[7] = 'a' + (f / 256);
+    pn[8] = 'a' + ((f / 16) % 16);
+    pn[9] = 'a' + (f % 16);
+    pn[10] = '\0';
+
+    if (link("/lof", pn) < 0) {
+      if (stat("/lof", &st) < 0) {
+        printf("%s: stat(/lof) failed\n", s);
+        exit(1);
+      }
+      if (st.nlink >= 32767) {
+        // overflow check succeeded.
+        break;
+      }
+      printf("%s: link failed after %d links (nlink=%d)\n", s, i, st.nlink);
+      exit(1);
+    }
+
+    if (i % 100 == 0) {
+      printf("%s: i=%d, pn=%s\n", s, i, pn);
+    }
+  }
+
+  if (stat("/lof", &st) < 0) {
+    printf("%s: stat(/lof) failed\n", s);
+    exit(1);
+  }
+
+  unlink("/lof");
+
+  if (st.nlink < 0) {
+    printf("%s: negative link count: %d\n", s, st.nlink);
+    exit(1);
+  }
+}
+
 struct test slowtests[] = {
   {bigdir, "bigdir"},
   {manywrites, "manywrites"},
@@ -3232,6 +3370,7 @@ struct test slowtests[] = {
   {execout, "execout"},
   {diskfull, "diskfull"},
   {outofinodes, "outofinodes"},
+  // {linkoverflow, "linkoverflow"},
 
   {0, 0},
 };
