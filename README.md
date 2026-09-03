@@ -3,7 +3,7 @@
 
 ```mermaid
 graph TD
-    start["Начало"]
+    start["<a href='https://github.com/secs-dev/os-course' style='color:black;'>Начало</a>"]
 
     subgraph fs ["Файловая система"]
         shebang["<a href='https://github.com/secs-dev/xv6-riscv/blob/main/doc/lab/shebang.md' style='color:black;'>Shebang</a>"]
