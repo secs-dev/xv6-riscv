@@ -104,6 +104,6 @@ graph TD
     class alarm hard
 
     class pteprint free
-    class cow,shmem medium
-    class aslr,swap,lazyalloc,hugepage hard
+    class cow,lazyalloc,shmem medium
+    class aslr,swap,hugepage hard
 ```
