@@ -99,10 +99,11 @@ graph TD
 
     class nic hard
 
-    class thread,mlfq medium
-    class alarm,allocproc hard
+    class filealloc easy
+    class thread,mlfq,allocproc medium
+    class alarm hard
 
     class pteprint free
-    class filealloc,cow,shmem medium
+    class cow,shmem medium
     class aslr,swap,lazyalloc,hugepage hard
 ```
