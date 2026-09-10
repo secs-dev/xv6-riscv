@@ -37,7 +37,7 @@ graph TD
 
     subgraph mm ["Управление RAM"]
         filealloc["<a href='https://github.com/secs-dev/xv6-riscv/blob/main/doc/lab/filealloc.md' style='color:black;'>Аллокатор RAM</a>"]
-        pteprint["<a href='https://github.com/secs-dev/xv6-riscv/blob/main/doc/lab/printpte.md' style='color:black;'>Печать таблицы страниц</a>"]
+        pteprint["<a href='https://github.com/secs-dev/xv6-riscv/blob/main/doc/lab/pteprint.md' style='color:black;'>Печать таблицы страниц</a>"]
         shmem["<a href='https://github.com/secs-dev/xv6-riscv/blob/main/doc/lab/shmem.md' style='color:black;'>Shared Memory</a>"]
         cow["<a href='https://github.com/secs-dev/xv6-riscv/blob/main/doc/lab/cow.md' style='color:black;'>COW Fork</a>"]
         swap["<a href='https://github.com/secs-dev/xv6-riscv/blob/main/doc/lab/swap.md' style='color:black;'>Swapping</a>"]
