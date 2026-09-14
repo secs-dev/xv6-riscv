@@ -9,5 +9,5 @@ MLFQ (multi-level feedback queue) адаптирует приоритет
 
 ## Задача
 
-Замените политику планирования процессов
-в Xv6 с round-robin на MLFQ.
+Замените в Xv6 политику планирования процессов
+round-robin на MLFQ.

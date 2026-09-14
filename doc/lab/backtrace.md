@@ -11,7 +11,7 @@ kernel-space. Backtrace — необходимый объект для
 ## Задача
 
 В ядре ОС реализуйте процедуры для получения backtrace
-со стеков как в userspace, так и kernelspace.
+со стеков как в userspace, так и в kernelspace.
 
 Сам backtrace представляет собой список/массив адресов.
 
