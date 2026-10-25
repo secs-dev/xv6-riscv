@@ -54,4 +54,4 @@ make qemu
 
 [1]: https://www.docker.com/
 [2]: https://docs.docker.com/engine/install/
-[3]: https://hub.docker.com/repository/docker/vityamand/xv6/general
+[3]: https://hub.docker.com/r/vityamand/xv6
