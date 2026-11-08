@@ -25,6 +25,8 @@ char *sys_sbrk(int, int);
 int pause(int);
 int uptime(void);
 int sync(void);
+int dump(void);
+int dump2(int pid, int register_num, uint64 *return_value);
 
 // ulib.c
 int stat(const char *, struct stat *);

@@ -699,3 +699,64 @@ procdump(void)
     printk("\n");
   }
 }
+
+int
+dump(void)
+{
+  struct proc *p = myproc();
+  uint64 *regs = &p->trapframe->s2;
+
+  for (int i = 0; i < 10; i++)
+    printk("s%d = %d\n", i + 2, (int)regs[i]);
+  return 0;
+}
+
+int
+dump2(int pid, int register_num, uint64 return_value)
+{
+  struct proc *cur = myproc();
+  struct proc *target = 0;
+  struct proc *p;
+  uint64 value;
+
+  acquire(&wait_lock);
+
+
+  for (p = proc; p < &proc[NPROC]; p++) {
+    if (p->state != UNUSED && p->pid == pid) {
+      target = p;
+      break;
+    }
+  }
+  if (target == 0) {
+    release(&wait_lock);
+    return -2;
+  }
+
+  int allowed = 0;
+  for (p = target; p != 0; p = p->parent) {
+    if (p == cur) {
+      allowed = 1;
+      break;
+    }
+  }
+  if (!allowed) {
+    release(&wait_lock);
+    return -1;
+  }
+
+  if (register_num < 2 || register_num > 11) {
+    release(&wait_lock);
+    return -3;
+  }
+
+  acquire(&target->lock);
+  value = (&target->trapframe->s2)[register_num - 2];
+  release(&target->lock);
+  release(&wait_lock);
+
+  if (copyout(cur->pagetable, cur->sz, return_value, (char *)&value, sizeof(value)) < 0)
+    return -4;
+
+  return 0;
+}
