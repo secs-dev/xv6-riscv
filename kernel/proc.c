@@ -653,6 +653,118 @@ either_copyout(int user_dst, uint64 dst, void *src, uint64 len)
   }
 }
 
+void 
+dump(void) 
+{
+	struct proc *p = myproc();
+	struct trapframe *tf = p->trapframe;
+
+	uint64 regs[10] = {
+		tf->s2,
+		tf->s3,
+		tf->s4,
+		tf->s5,
+		tf->s6,
+		tf->s7, 
+		tf->s8,
+		tf->s9,
+		tf->s10,
+		tf->s11
+	};
+	
+	for (int i=0; i < 10; i++) {
+		printk("s%d: %d\n", i+2, (int)(uint)regs[i]);
+
+	}
+}
+
+
+
+
+int 
+dump2(int pid, int register_num, uint64 *return_value) {
+	struct proc *p;
+	struct proc *caller = myproc();
+	int flag = 0;
+	int chm = 0;
+	uint64 value = 0;
+
+	
+	if (register_num < 2 || register_num > 11) {
+		return -3;
+	}
+
+	acquire(&wait_lock);
+
+	for (p = proc; p < &proc[NPROC]; p++) {
+		acquire(&p->lock);
+		if (p->state != UNUSED && p->pid == pid) {
+			flag = 1;
+			break;
+		}
+
+		release(&p->lock);
+		
+
+	}
+
+	if (!flag) {
+		release(&wait_lock);
+		return -2;
+	}
+	
+
+	for (struct proc *q = p; q != 0; q = q->parent) {
+
+		if (q == caller) {
+			chm = 1;
+			break;	
+		}
+		
+		
+
+	
+	}
+
+	if (!chm) {
+		release(&p->lock);
+		release(&wait_lock);
+		return -1;
+	}
+
+	struct trapframe *tf = p->trapframe;
+
+
+        uint64 regs[10] = {
+   		 tf->s2,
+		 tf->s3,
+		 tf->s4,
+		 tf->s5,
+		 tf->s6,
+		 tf->s7, 
+		 tf->s8,
+		 tf->s9, 
+		 tf->s10, 
+		 tf->s11
+	};
+
+	value = regs[register_num - 2];
+	
+	release(&p->lock);
+	release(&wait_lock);
+
+	if (copyout(caller -> pagetable, caller -> sz, (uint64)return_value, (char *)&value,sizeof(value)) < 0) {
+		return -4;
+	}
+	
+		
+	
+	return 0;
+
+}
+
+
+
 // Copy from either a user address, or kernel address,
 // depending on usr_src.
 // Returns 0 on success, -1 on error.

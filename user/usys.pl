@@ -23,6 +23,8 @@ sub entry {
 	
 entry("fork");
 entry("exit");
+entry("dump");
+entry("dump2");
 entry("wait");
 entry("pipe");
 entry("read");

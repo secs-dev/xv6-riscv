@@ -4,6 +4,8 @@ struct stat;
 
 // system calls
 int fork(void);
+int dump(void);
+int dump2(int pid, int register_num, uint64 *return_value);
 int exit(int) __attribute__((noreturn));
 int wait(int *);
 int pipe(int *);

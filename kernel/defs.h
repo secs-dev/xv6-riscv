@@ -81,6 +81,8 @@ void            printkinit(void);
 
 // proc.c
 int             cpuid(void);
+void		dump(void);
+int		dump2(int, int, uint64 *);
 void            kexit(int);
 int             kfork(void);
 int             growproc(int);
