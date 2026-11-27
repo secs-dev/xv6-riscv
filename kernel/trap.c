@@ -82,8 +82,24 @@ usertrap(void)
     kexit(-1);
 
   // give up the CPU if this is a timer interrupt.
-  if (which_dev == 2)
-    yield();
+  if (which_dev == 2) {
+	if (p->intervalAl > 0) {
+    		printk("TIMER: ticks=%d interval=%d active=%d\n",
+           	p->ticksAl, p->intervalAl, p->alarmActive);
+	}
+	if (p -> intervalAl > 0 && p -> alarmActive == 0) {
+		p -> ticksAl++;
+
+		if (p -> ticksAl >= p -> intervalAl) {
+			p -> savedReg = *(p -> trapframe);
+			p -> alarmActive = 1;
+			p -> ticksAl = 0;
+			p -> trapframe -> epc = p -> addrHandler;
+		}
+		
+	}
+  	yield();
+  }
 
   prepare_return();
 

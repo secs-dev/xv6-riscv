@@ -22,6 +22,41 @@ sys_getpid(void)
   return myproc()->pid;
 }
 
+
+uint64
+sys_sigalarm(void)
+{
+	int ticks;
+	uint64 handler;
+	argint(0, &ticks);
+	argaddr(1, &handler);
+
+	if (ticks < 0) return -1;
+
+	struct proc *p = myproc();
+	p -> intervalAl = ticks;
+	p -> addrHandler = handler;
+	p -> ticksAl = 0;
+	printk("SIGALARM: interval=%d handler=%p\n",
+        p->intervalAl, (void *)p->addrHandler);
+	
+	return 0;
+}
+
+uint64 
+sys_sigreturn(void) 
+{
+	struct proc *p = myproc();
+	if (p -> alarmActive == 0) return -1;
+	
+	uint64 oldA0 = p -> savedReg.a0;
+	*(p -> trapframe) = p -> savedReg;
+	p -> alarmActive = 0;
+	p -> ticksAl = 0;
+	return oldA0;
+}
+
+
 uint64
 sys_fork(void)
 {
